@@ -25,7 +25,7 @@ document.getElementById('updateStockForm').addEventListener('submit', async func
     const addStock = parseInt(document.getElementById('addStock').value);
     
     try {
-        const response = await fetch(`http://localhost:3000/api/medicines/${medicineId}/updateStock`, {
+       const response = await fetch(`${apiService.baseUrl}/medicines/${medicineId}/updateStock`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

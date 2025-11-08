@@ -298,15 +298,49 @@ function updateSalesStats(orders) {
     pendingOrdersElem.textContent = pendingOrders;
 }
 
+/* ------------------------------
+   ✅ Improved Status Update with Dropdown
+--------------------------------*/
 async function handleUpdateOrderStatus(orderId) {
-    try {
-        const newStatus = prompt('Enter new status (Processing/Shipped/Delivered):');
+    const row = document.querySelector(`button[onclick="handleUpdateOrderStatus('${orderId}')"]`)?.closest('tr');
+    if (!row) return;
+
+    // Create dropdown if not already present
+    let existingSelect = row.querySelector('.status-dropdown');
+    if (existingSelect) return; // already open
+
+    const select = document.createElement('select');
+    select.className = 'status-dropdown';
+    select.style.padding = '6px';
+    select.style.borderRadius = '6px';
+    select.style.border = '1px solid #ccc';
+    select.style.marginLeft = '5px';
+    select.innerHTML = `
+        <option value="">--Select--</option>
+        <option value="Confirmed">Confirmed</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Cancelled">Cancelled</option>
+    `;
+
+    // Replace Update button temporarily
+    const updateBtn = row.querySelector('button.btn-primary');
+    updateBtn.style.display = 'none';
+    updateBtn.insertAdjacentElement('afterend', select);
+
+    select.addEventListener('change', async () => {
+        const newStatus = select.value;
         if (!newStatus) return;
-        await adminApi.updateOrderStatus(orderId, newStatus);
-        alert('Order status updated successfully!');
-        await loadOrdersFromDB();
-    } catch (error) {
-        console.error('Failed to update order status:', error);
-        alert('Error updating order status.');
-    }
+
+        try {
+            // Call API to update order status
+            await adminApi.updateOrderStatus(orderId, newStatus);
+            alert(`Order status updated to ${newStatus}!`);
+            await loadOrdersFromDB(); // refresh the table
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            alert('Failed to update order status.');
+        }
+    });
 }
+

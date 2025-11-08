@@ -1,14 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sales Report - Anvik Biotecch</title>
-    <link rel="stylesheet" href="../styles/main.css">
-    <link rel="stylesheet" href="../styles/admin.css">
+    <link rel="stylesheet" href="../styles/main.css" />
+    <link rel="stylesheet" href="../styles/admin.css" />
+
+    <style>
+        /* ✅ Optional: clean summary styling */
+        #filterSummary {
+            background: #f6f9ff;
+            border: 1px solid #d7e2f2;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 20px;
+            font-size: 15px;
+            text-align: center;
+            color: #333;
+            display: none;
+        }
+    </style>
 </head>
+
 <body class="admin-body">
     <div class="admin-container">
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Anvik Biotecch</h2>
@@ -23,6 +40,7 @@
             </nav>
         </aside>
 
+        <!-- Main Content -->
         <main class="main-content">
             <header class="content-header">
                 <h1>Sales Report</h1>
@@ -33,6 +51,7 @@
             </header>
 
             <section class="section">
+                <!-- Top Sales Stats -->
                 <div class="sales-stats">
                     <div class="stat-card">
                         <h3>Total Sales</h3>
@@ -48,19 +67,23 @@
                     </div>
                 </div>
 
-                <div class="filters" style="display:flex;gap:12px;align-items:center;margin:18px 0;flex-wrap:wrap;">
-                    <div style="display:flex;gap:6px;align-items:center;">
-                        <label for="startDate" style="font-weight:600;color:#333;">Start</label>
+                <!-- Filters -->
+                <div
+                    class="filters"
+                    style="display: flex; gap: 12px; align-items: center; margin: 18px 0; flex-wrap: wrap;"
+                >
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <label for="startDate" style="font-weight: 600; color: #333;">Start</label>
                         <input type="date" id="startDate" />
                     </div>
-                    <div style="display:flex;gap:6px;align-items:center;">
-                        <label for="endDate" style="font-weight:600;color:#333;">End</label>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <label for="endDate" style="font-weight: 600; color: #333;">End</label>
                         <input type="date" id="endDate" />
                     </div>
                     <button id="applyDateFilterBtn" class="btn btn-primary">Apply Date Filter</button>
 
-                    <div style="display:flex;gap:6px;align-items:center;margin-left:8px;">
-                        <label for="monthPicker" style="font-weight:600;color:#333;">Month</label>
+                    <div style="display: flex; gap: 6px; align-items: center; margin-left: 8px;">
+                        <label for="monthPicker" style="font-weight: 600; color: #333;">Month</label>
                         <input type="month" id="monthPicker" />
                     </div>
                     <button id="applyMonthFilterBtn" class="btn btn-primary">Filter Month</button>
@@ -68,6 +91,7 @@
                     <button id="clearFiltersBtn" class="btn btn-secondary">Clear Filters</button>
                 </div>
 
+                <!-- Orders Table -->
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
@@ -81,14 +105,18 @@
                             </tr>
                         </thead>
                         <tbody id="ordersList">
-                            <!-- Orders will be populated by JavaScript -->
+                            <!-- Orders populated by admin-api.js -->
                         </tbody>
                     </table>
                 </div>
+
+                <!-- ✅ Added Summary Section (appears after filtering) -->
+                <div id="filterSummary"></div>
             </section>
         </main>
     </div>
 
+    <!-- JS Files -->
     <script src="../scripts/api-service.js"></script>
     <script src="../scripts/admin-api.js"></script>
     <script src="../scripts/admin.js"></script>

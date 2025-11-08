@@ -358,7 +358,7 @@
                     <h2>Medicines Stock Management</h2>
                     <div style="display: flex; gap: 10px;">
                         <button class="btn btn-primary" onclick="showAddMedicineForm()">Add New Medicine</button>
-                        <button class="btn btn-secondary" onclick="addSampleMedicines()">Add Sample Medicines</button>
+
                         <button class="btn btn-secondary" onclick="refreshMedicinesTable()">Refresh</button>
                     </div>
                 </div>
@@ -510,7 +510,7 @@
                     row.innerHTML = `
                         <td>${medicine.image ? `<img src="${medicine.image}" alt="${medicine.name}" class="medicine-thumbnail">` : '<img src="https://via.placeholder.com/50" alt="No image" class="medicine-thumbnail">'}</td>
                         <td>${medicine.name}</td>
-                        <td>${medicine.batchNo || medicine.batchNumber || 'N/A'}</td>
+                        <td>${medicine.batchNumber || medicine.batchNo || 'N/A'}</td>
                         <td>${(medicine.category || '').charAt(0).toUpperCase() + (medicine.category || '').slice(1)}</td>
                         <td>₹${parseFloat(medicine.price || 0).toFixed(2)}</td>
                         <td><span class="stock-badge ${stockClass}">${stockStatus}</span></td>
@@ -578,10 +578,10 @@
 
                 const medicineData = {
                     name: medicineName,
-                    batchNo: batchNumber, // Backend uses batchNo
-                    totalQty: quantityInput, // Backend uses totalQty
+                    batchNumber: batchNumber, // ✅ Backend expects batchNumber
+                    totalQty: quantityInput,
                     price: priceInput,
-                    expiryDate: expiryDate, // Will be converted to Date by MongoDB
+                    expiryDate: expiryDate,
                     category: category
                 };
 
@@ -707,7 +707,7 @@
             
             try {
                 const token = localStorage.getItem('authToken');
-                const response = await fetch(`http://localhost:3000/api/medicines/${medicineId}/updateStock`, {
+                const response = await fetch(`https://bakend-88v1.onrender.com/api/medicines/${medicineId}/updateStock`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -744,7 +744,7 @@
                 const availableQty = (medicine.totalQty || 0) - (medicine.soldQty || 0);
                 
                 form.elements['medicineName'].value = medicine.name || '';
-                form.elements['batchNumber'].value = medicine.batchNo || medicine.batchNumber || '';
+                form.elements['batchNumber'].value = medicine.batchNumber || medicine.batchNo || '';
                 form.elements['quantity'].value = availableQty; // Show available quantity
                 form.elements['price'].value = medicine.price || '';
                 
@@ -811,42 +811,7 @@
             await loadMedicines();
         }
 
-        // Add sample medicines function
-        async function addSampleMedicines() {
-            if (!confirm('This will add 4 sample medicines to the database. Continue?')) {
-                return;
-            }
-
-            try {
-                const token = localStorage.getItem('authToken');
-                if (!token) {
-                    alert('You are not logged in. Please login again.');
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                const response = await fetch('http://localhost:3000/api/medicines/seed', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to add sample medicines');
-                }
-
-                alert(data.message || 'Sample medicines added successfully!');
-                await loadMedicines();
-            } catch (error) {
-                console.error('Error adding sample medicines:', error);
-                alert('Failed to add sample medicines: ' + (error.message || 'Unknown error'));
-            }
-        }
-
+        
         // Logout function
         function handleLogout() {
             if (confirm('Are you sure you want to logout?')) {
@@ -916,6 +881,15 @@
                 logoutBtn.addEventListener('click', handleLogout);
             }
         });
+        window.showAddMedicineForm = showAddMedicineForm;
+        window.hideAddMedicineForm = hideAddMedicineForm;
+        window.refreshMedicinesTable = refreshMedicinesTable;
+        window.showUpdateStockModal = showUpdateStockModal;
+        window.hideUpdateStockModal = hideUpdateStockModal;
+        window.editMedicine = editMedicine;
+        window.deleteMedicine = deleteMedicine;
+        window.handleStockUpdate = handleStockUpdate;
+        window.scrollToMedicinesStock = scrollToMedicinesStock;
     </script>
 </body>
 </html>

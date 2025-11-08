@@ -18,14 +18,12 @@ const adminApi = {
 
     async addMedicine(medicineData) {
         await this.checkAdminAuth();
-        
-        // 🔍 DEBUG: Log what admin-api receives
+
         console.log('🔍 admin-api.js - Received medicineData:', medicineData);
-        
-        // ✅ CORRECT: Pass data directly without field name conversion
+
         const dataToSend = {
             name: medicineData.name,
-            batchNumber: medicineData.batchNumber, // ✅ Keep as batchNumber
+            batchNumber: medicineData.batchNumber,
             totalQty: medicineData.quantity || medicineData.totalQty,
             price: medicineData.price,
             expiryDate: medicineData.expiryDate,
@@ -33,16 +31,9 @@ const adminApi = {
             soldQty: medicineData.soldQty || 0
         };
 
-        // Add optional fields if present
-        if (medicineData.description) {
-            dataToSend.description = medicineData.description;
-        }
-        if (medicineData.dosage) {
-            dataToSend.dosage = medicineData.dosage;
-        }
-        if (medicineData.image) {
-            dataToSend.image = medicineData.image;
-        }
+        if (medicineData.description) dataToSend.description = medicineData.description;
+        if (medicineData.dosage) dataToSend.dosage = medicineData.dosage;
+        if (medicineData.image) dataToSend.image = medicineData.image;
 
         console.log('🔍 admin-api.js - Sending to apiService:', dataToSend);
         return await apiService.addMedicine(dataToSend);
@@ -50,27 +41,19 @@ const adminApi = {
 
     async updateMedicine(id, medicineData) {
         await this.checkAdminAuth();
-        
-        // ✅ CORRECT: Pass data directly without field name conversion
+
         const dataToSend = {
             name: medicineData.name,
-            batchNumber: medicineData.batchNumber, // ✅ Keep as batchNumber
+            batchNumber: medicineData.batchNumber,
             totalQty: medicineData.quantity || medicineData.totalQty,
             price: medicineData.price,
             expiryDate: medicineData.expiryDate,
             category: medicineData.category
         };
 
-        // Add optional fields if present
-        if (medicineData.description) {
-            dataToSend.description = medicineData.description;
-        }
-        if (medicineData.dosage) {
-            dataToSend.dosage = medicineData.dosage;
-        }
-        if (medicineData.image) {
-            dataToSend.image = medicineData.image;
-        }
+        if (medicineData.description) dataToSend.description = medicineData.description;
+        if (medicineData.dosage) dataToSend.dosage = medicineData.dosage;
+        if (medicineData.image) dataToSend.image = medicineData.image;
 
         return await apiService.updateMedicine(id, dataToSend);
     },
@@ -114,7 +97,6 @@ async function checkAdminAuth() {
         return;
     }
 
-    // Verify token is valid
     if (token) {
         try {
             await apiService.getDashboardStats();
@@ -128,19 +110,15 @@ async function checkAdminAuth() {
 }
 
 async function initializeAdminDashboard() {
-    // Load medicines if on dashboard
     if (document.getElementById('medicinesList')) {
         await loadMedicinesFromDB();
     }
 
-    // Load orders if on sales page
     if (document.getElementById('ordersList')) {
-        await loadOrdersFromDB();
-        // wire up filters if present
-        setupOrderFilters();
+        await loadOrdersFromDB(); // ✅ added below
+        if (typeof setupOrderFilters === 'function') setupOrderFilters();
     }
 
-    // Load dashboard stats if on dashboard
     if (document.querySelector('.sales-stats')) {
         await loadDashboardStats();
     }
@@ -159,7 +137,7 @@ async function loadMedicinesFromDB() {
 function displayMedicines(medicines) {
     const medicinesList = document.getElementById('medicinesList');
     if (!medicinesList) return;
-    
+
     medicinesList.innerHTML = '';
 
     medicines.forEach(medicine => {
@@ -181,7 +159,6 @@ function displayMedicines(medicines) {
 
 async function addMedicineToDB(medicineData) {
     try {
-        // Use the fixed adminApi.addMedicine method
         await adminApi.addMedicine(medicineData);
         await loadMedicinesFromDB();
         hideAddMedicineForm();
@@ -194,8 +171,7 @@ async function addMedicineToDB(medicineData) {
 async function editMedicine(medicineId) {
     try {
         const medicine = await apiService.getMedicine(medicineId);
-        
-        // Populate form with medicine data
+
         document.getElementById('medicineName').value = medicine.name;
         document.getElementById('batchNumber').value = medicine.batchNumber || medicine.batchNo || '';
         document.getElementById('quantity').value = medicine.quantity || ((medicine.totalQty || 0) - (medicine.soldQty || 0));
@@ -206,8 +182,7 @@ async function editMedicine(medicineId) {
         document.getElementById('dosage').value = medicine.dosage || '';
 
         showAddMedicineForm();
-        
-        // Set form to update mode
+
         const form = document.getElementById('medicineForm');
         form.onsubmit = async (e) => {
             e.preventDefault();
@@ -220,7 +195,7 @@ async function editMedicine(medicineId) {
 
 async function updateMedicineInDB(medicineId) {
     const formData = new FormData(document.getElementById('medicineForm'));
-    
+
     const medicineData = {
         name: formData.get('medicineName'),
         batchNumber: formData.get('batchNumber'),
@@ -254,4 +229,84 @@ async function deleteMedicine(medicineId) {
     }
 }
 
-// ... rest of your existing code (orders, dashboard stats, etc.) remains the same
+/* ------------------------------
+   ✅ Added Orders Loader + Status Updater
+--------------------------------*/
+
+async function loadOrdersFromDB() {
+    try {
+        console.log('📦 Loading orders from backend...');
+
+        const response = await adminApi.getOrders();
+        let orders = [];
+
+        if (Array.isArray(response)) orders = response;
+        else if (response?.orders) orders = response.orders;
+        else if (response?.data) orders = response.data;
+
+        console.log('✅ Orders loaded:', orders.length);
+
+        const ordersList = document.getElementById('ordersList');
+        if (!ordersList) return;
+
+        ordersList.innerHTML = '';
+
+        if (orders.length === 0) {
+            ordersList.innerHTML = `<tr><td colspan="6" style="text-align:center;">No orders found</td></tr>`;
+            return;
+        }
+
+        orders.forEach(order => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${order.orderId || order._id || '—'}</td>
+                <td>${order.customerName || order.customer || '—'}</td>
+                <td>₹${order.totalAmount || order.total || 0}</td>
+                <td>${order.orderStatus || order.status || 'Pending'}</td>
+                <td>${new Date(order.createdAt || order.date || Date.now()).toLocaleDateString()}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick="handleUpdateOrderStatus('${order.orderId || order._id}')">Update Status</button>
+                </td>
+            `;
+            ordersList.appendChild(row);
+        });
+
+        updateSalesStats(orders);
+    } catch (error) {
+        console.error('❌ Failed to load orders:', error);
+        const ordersList = document.getElementById('ordersList');
+        if (ordersList) {
+            ordersList.innerHTML = `<tr><td colspan="6" style="text-align:center;color:red;">Error loading orders</td></tr>`;
+        }
+    }
+}
+
+function updateSalesStats(orders) {
+    const totalSalesElem = document.querySelectorAll('.stat-number')[0];
+    const ordersTodayElem = document.querySelectorAll('.stat-number')[1];
+    const pendingOrdersElem = document.querySelectorAll('.stat-number')[2];
+
+    if (!totalSalesElem || !ordersTodayElem || !pendingOrdersElem) return;
+
+    const totalSales = orders.reduce((sum, o) => sum + (parseFloat(o.totalAmount || o.total || 0)), 0);
+    const today = new Date().toISOString().split('T')[0];
+    const ordersToday = orders.filter(o => (o.createdAt || '').startsWith(today)).length;
+    const pendingOrders = orders.filter(o => (o.orderStatus || o.status || '').toLowerCase() === 'pending').length;
+
+    totalSalesElem.textContent = `₹${totalSales.toLocaleString()}`;
+    ordersTodayElem.textContent = ordersToday;
+    pendingOrdersElem.textContent = pendingOrders;
+}
+
+async function handleUpdateOrderStatus(orderId) {
+    try {
+        const newStatus = prompt('Enter new status (Processing/Shipped/Delivered):');
+        if (!newStatus) return;
+        await adminApi.updateOrderStatus(orderId, newStatus);
+        alert('Order status updated successfully!');
+        await loadOrdersFromDB();
+    } catch (error) {
+        console.error('Failed to update order status:', error);
+        alert('Error updating order status.');
+    }
+}

@@ -47,8 +47,8 @@ async function loadCustomerOrders() {
             throw new Error('Please login to view your orders');
         }
 
-        // Use the authenticated request method from authService
-        const response = await fetch('http://localhost:3000/api/customer/orders', {
+        // ✅ Fixed backend API URL here
+        const response = await fetch('https://bakend-88v1.onrender.com/api/customer/orders', {
             method: 'GET',
             headers: authService.getAuthHeaders()
         });

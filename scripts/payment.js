@@ -159,7 +159,7 @@ async function createBackendOrder(paymentMethod) {
 
         console.log('Sending order to backend:', orderPayload);
 
-        const response = await fetch('http://localhost:3000/api/orders', {
+       const response = await fetch('https://bakend-88v1.onrender.com/api/orders', {
             method: 'POST',
             headers: authService.getAuthHeaders(),
             body: JSON.stringify(orderPayload)
@@ -221,7 +221,7 @@ async function createCashfreeOrder(amount) {
             returnUrl: 'https://webhook.site/9a123456-7890-1234-5678-1234567890ab'
         };
 
-        const response = await fetch('http://localhost:3000/api/payments/cashfree/create-order', {
+        const response = await fetch('https://bakend-88v1.onrender.com/api/payments/cashfree/create-order', {
             method: 'POST',
             headers: Object.assign({ 
                 'Content-Type': 'application/json',

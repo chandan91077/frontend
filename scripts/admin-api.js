@@ -262,7 +262,10 @@ async function loadOrdersFromDB() {
                 <td>${order.orderId || order._id || '—'}</td>
                 <td>${order.customerName || order.customer || '—'}</td>
                 <td>₹${order.totalAmount || order.total || 0}</td>
-                <td>${order.orderStatus || order.status || 'Pending'}</td>
+                <td class="order-status-cell ${getStatusColorClass(order.orderStatus || order.status)}">
+                ${order.orderStatus || order.status || 'Pending'}
+                </td>
+
                 <td>${new Date(order.createdAt || order.date || Date.now()).toLocaleDateString()}</td>
                 <td>
                     <button class="btn btn-primary btn-sm" onclick="handleUpdateOrderStatus('${order.orderId || order._id}')">Update Status</button>
@@ -343,4 +346,15 @@ async function handleUpdateOrderStatus(orderId) {
         }
     });
 }
+// 🎨 Assigns color classes to order statuses
+function getStatusColorClass(status) {
+    if (!status) return '';
+    const s = status.toLowerCase();
+    if (s.includes('deliver')) return 'status-delivered';   // Green
+    if (s.includes('cancel')) return 'status-cancelled';    // Red
+    if (s.includes('ship') || s.includes('confirm')) return 'status-shipped'; // Blue
+    if (s.includes('pend') || s.includes('process')) return 'status-pending'; // Orange
+    return '';
+}
+
 

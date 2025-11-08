@@ -444,5 +444,26 @@ function displayFilteredOrders(filteredOrders, title) {
     `;
     filterSummary.style.display = 'block';
 }
+/* =============================
+   ✅ Clear Filters Feature
+   ============================= */
+document.getElementById('clearFiltersBtn')?.addEventListener('click', async () => {
+    try {
+        // Clear date & month inputs
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        document.getElementById('monthPicker').value = '';
+
+        // Hide summary box
+        const summary = document.getElementById('filterSummary');
+        if (summary) summary.style.display = 'none';
+
+        // Reload all orders from backend
+        await loadOrdersFromDB();
+        alert('Filters cleared successfully!');
+    } catch (error) {
+        console.error('❌ Error clearing filters:', error);
+    }
+});
 
 

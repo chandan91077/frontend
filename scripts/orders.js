@@ -1,146 +1,175 @@
-class ApiService {
-    constructor() {
-        this.baseUrl = 'https://bakend-88v1.onrender.com/api'; // ✅ CHANGED
+// Orders management for customer
+
+let allOrders = [];
+let ordersPollingInterval = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateCartCount();
+    
+    // Check if user is logged in
+    if (!authService.isCustomer()) {
+        const ordersList = document.getElementById('ordersList');
+        if (ordersList) {
+            ordersList.innerHTML = `
+                <div class="error-message">
+                    <h3>Please Login</h3>
+                    <p>You need to login to view your order history.</p>
+                    <a href="login.html" class="btn btn-primary">Login Now</a>
+                </div>
+            `;
+        }
+        return;
     }
+    
+    loadCustomerOrders();
+    // Start polling for order updates every 10 seconds while on this page
+    if (document.getElementById('ordersList')) {
+        ordersPollingInterval = setInterval(() => {
+            loadCustomerOrders().catch(err => console.error('Polling error:', err));
+        }, 10000); // 10s
+    }
+});
 
-    getHeaders() {
-        const token = localStorage.getItem('authToken');
-        const headers = {
-            'Content-Type': 'application/json'
-        };
+// Clear polling when leaving the page
+window.addEventListener('beforeunload', function() {
+    if (ordersPollingInterval) {
+        clearInterval(ordersPollingInterval);
+        ordersPollingInterval = null;
+    }
+});
 
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+async function loadCustomerOrders() {
+    try {
+        console.log('Loading customer orders...');
+
+        // Check if user is logged in through auth service
+        if (!authService.isCustomer()) {
+            throw new Error('Please login to view your orders');
         }
 
-        return headers;
-    }
-
-    async request(endpoint, options = {}) {
-        try {
-            const url = `${this.baseUrl}${endpoint}`;
-            const headers = this.getHeaders();
-            
-            // Ensure method is set for POST/PUT requests
-            const config = {
-                method: options.method || 'GET',
-                headers: headers,
-                ...options
-            };
-            
-            // Only include body if it's a POST, PUT, or PATCH request
-            if (config.method !== 'GET' && config.method !== 'HEAD' && options.body) {
-                config.body = options.body;
-            }
-            
-            const response = await fetch(url, config);
-
-            const text = await response.text();
-            let data;
-            try {
-                data = text ? JSON.parse(text) : {};
-            } catch (err) {
-                data = { raw: text, error: 'Invalid JSON response' };
-            }
-
-            if (!response.ok) {
-                // Log full error for debugging
-                console.error('API Request Failed:', {
-                    url,
-                    status: response.status,
-                    statusText: response.statusText,
-                    data: data
-                });
-                
-                // Create a detailed error message
-                const errorMessage = data.error || data.message || response.statusText || 'Request failed';
-                const apiError = new Error(errorMessage);
-                apiError.status = response.status;
-                apiError.data = data;
-                throw apiError;
-            }
-
-            return data;
-        } catch (error) {
-            console.error('API Error:', error);
-            // Re-throw with more context if it's a network error
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                throw new Error('Network error: Unable to connect to server. Please check if the backend is running.');
-            }
-            throw error;
-        }
-    }
-
-    // Auth endpoints
-    async login(username, password) {
-        return this.request('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ username, password })
+        // Use the authenticated request method from authService
+        const response = await fetch('http://localhost:3000/api/customer/orders', {
+            method: 'GET',
+            headers: authService.getAuthHeaders()
         });
-    }
 
-    // Medicine endpoints
-    async getMedicines() {
-        return this.request('/medicines');
-    }
-
-    async getMedicine(id) {
-        return this.request(`/medicines/${id}`);
-    }
-
-    async addMedicine(medicineData) {
-        // ✅ CHANGED: Convert batchNumber to batchNo
-        const dataToSend = {
-            name: medicineData.name,
-            batchNo: medicineData.batchNumber, // ✅ Convert to batchNo
-            totalQty: medicineData.totalQty,
-            price: medicineData.price,
-            expiryDate: medicineData.expiryDate,
-            category: medicineData.category,
-            soldQty: medicineData.soldQty || 0
-        };
-
-        // Add image if present
-        if (medicineData.image) {
-            dataToSend.image = medicineData.image;
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Failed to fetch orders: ${response.statusText}`);
         }
 
-        return this.request('/medicines', {
-            method: 'POST',
-            body: JSON.stringify(dataToSend)
-        });
-    }
-
-    async updateMedicine(id, medicineData) {
-        return this.request(`/medicines/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(medicineData)
-        });
-    }
-
-    async deleteMedicine(id) {
-        return this.request(`/medicines/${id}`, {
-            method: 'DELETE'
-        });
-    }
-
-    // Order endpoints
-    async getOrders() {
-        return this.request('/orders');
-    }
-
-    async updateOrderStatus(orderId, status) {
-        return this.request(`/orders/${orderId}/status`, {
-            method: 'PUT',
-            body: JSON.stringify({ orderStatus: status })
-        });
-    }
-
-    // Dashboard endpoints
-    async getDashboardStats() {
-        return this.request('/dashboard/stats');
+        const data = await response.json();
+        console.log('Orders loaded:', data);
+        
+        allOrders = Array.isArray(data) ? data : [];
+        displayOrders(allOrders);
+        
+    } catch (error) {
+        console.error('Failed to load orders:', error);
+        
+        // Show error message to user
+        const ordersList = document.getElementById('ordersList');
+        if (ordersList) {
+            ordersList.innerHTML = `
+                <div class="error-message">
+                    <h3>Unable to load orders</h3>
+                    <p>${error.message || 'Please try refreshing the page or contact support if the problem continues.'}</p>
+                    <button onclick="loadCustomerOrders()" class="btn btn-primary">Retry</button>
+                </div>
+            `;
+        }
+        
+        const emptyOrders = document.getElementById('emptyOrders');
+        if (emptyOrders) {
+            emptyOrders.style.display = 'none';
+        }
     }
 }
 
-// Create global instance
-const apiService = new ApiService();
+// Rest of the functions remain the same...
+function displayOrders(orders) {
+    const ordersList = document.getElementById('ordersList');
+    const emptyOrders = document.getElementById('emptyOrders');
+    
+    if (!ordersList || !emptyOrders) return;
+    
+    if (!orders || orders.length === 0) {
+        if (ordersList) ordersList.style.display = 'none';
+        if (emptyOrders) emptyOrders.style.display = 'block';
+        return;
+    }
+    
+    if (emptyOrders) emptyOrders.style.display = 'none';
+    if (ordersList) ordersList.style.display = 'block';
+    
+    // Sort orders by date (newest first)
+    orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    ordersList.innerHTML = orders.map(order => `
+        <div class="order-card" data-status="${order.orderStatus}">
+            <div class="order-header">
+                <div class="order-info">
+                    <span class="order-id">Order #${order.orderId}</span>
+                    <span class="order-date">Placed on ${new Date(order.createdAt).toLocaleDateString()}</span>
+                    <span class="order-amount">Total: ₹${order.totalAmount}</span>
+                </div>
+                <div class="order-actions">
+                    <span class="order-status status-${order.orderStatus}">${formatStatus(order.orderStatus)}</span>
+                    <a href="order-tracking.html?orderId=${order.orderId}" class="btn btn-sm btn-outline">Track Order</a>
+                </div>
+            </div>
+            
+            <div class="order-items">
+                <strong>Items:</strong>
+                ${order.items.map(item => `
+                    <div class="order-item">
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-quantity">Qty: ${item.quantity}</span>
+                        <span class="item-price">₹${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="order-footer">
+                <div class="shipping-info">
+                    <strong>Shipping to:</strong> ${order.shippingAddress.name}, ${order.shippingAddress.city}
+                </div>
+                <div class="payment-info">
+                    <strong>Payment:</strong> ${order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function formatStatus(status) {
+    const statusMap = {
+        'pending': 'Pending',
+        'confirmed': 'Confirmed',
+        'shipped': 'Shipped',
+        'delivered': 'Delivered',
+        'cancelled': 'Cancelled'
+    };
+    return statusMap[status] || status;
+}
+
+function filterOrders() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    if (statusFilter === 'all') {
+        displayOrders(allOrders);
+    } else {
+        const filteredOrders = allOrders.filter(order => order.orderStatus === statusFilter);
+        displayOrders(filteredOrders);
+    }
+}
+
+// Update cart count function
+function updateCartCount() {
+    const cartCount = document.getElementById('cartCount');
+    if (cartCount) {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCount.textContent = totalItems;
+    }
+}

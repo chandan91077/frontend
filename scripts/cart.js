@@ -21,7 +21,8 @@ async function addToCart(medicineId, quantity = 1) {
         }
 
         // Fetch medicine details from the server
-        const response = await fetch(`http://localhost:3000/api/medicines/${medicineId}`);
+        // ✅ CORRECT
+        const response = await fetch(`https://bakend-88v1.onrender.com/api/medicines/${medicineId}`);
         if (!response.ok) {
             throw new Error('Failed to fetch medicine details');
         }

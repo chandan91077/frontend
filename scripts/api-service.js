@@ -151,7 +151,7 @@ class ApiService {
 
     // Order endpoints
     async getOrders() {
-        return this.request('/orders');
+        return this.request('/admin/orders');
     }
 
     async updateOrderStatus(orderId, status) {

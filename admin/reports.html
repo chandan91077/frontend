@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Anvik Biotecch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: #1a252f;
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            color: #3498db;
+            font-size: 1.5rem;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        .sidebar-nav li {
+            margin: 5px 0;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 15px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #34495e;
+            border-left: 4px solid #3498db;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 20px;
+        }
+
+        .content-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .content-header h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-header h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card.sales {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card.orders {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card.medicines {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .stat-card.revenue {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .stat-change {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 300px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-section label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .filter-section input,
+        .filter-section select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Anvik Biotecch</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                    <li><a href="dashboard.html#medicines-stock" class="nav-link">Medicines Stock</a></li>
+                    <li><a href="sales.html" class="nav-link">Sales</a></li>
+                    <li><a href="reports.html" class="nav-link active">Reports</a></li>
+                   
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Reports & Analytics</h1>
+                <div class="header-actions">
+                    <span>Welcome, Admin</span>
+                    <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+                </div>
+            </header>
+
+            <!-- Statistics Overview -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>Overview Statistics</h2>
+                    <button class="btn btn-primary" onclick="refreshReports()">Refresh</button>
+                </div>
+                <div class="stats-grid" id="statsGrid">
+                    <!-- Stats will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Sales Report -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>Sales Report</h2>
+                </div>
+                <div class="filter-section">
+                    <label>Date Range:</label>
+                    <input type="date" id="salesStartDate">
+                    <label>to</label>
+                    <input type="date" id="salesEndDate">
+                    <button class="btn btn-primary" onclick="filterSalesReport()">Filter</button>
+                    <button class="btn btn-secondary" onclick="clearSalesFilter()">Clear</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Amount (₹)</th>
+                                <th>Status</th>
+                                <th>Payment Method</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesReportTable">
+                            <!-- Sales data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Medicine Stock Report -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>Medicine Stock Report</h2>
+                </div>
+                <div class="filter-section">
+                    <label>Filter by:</label>
+                    <select id="stockFilter">
+                        <option value="all">All Medicines</option>
+                        <option value="low">Low Stock (≤10)</option>
+                        <option value="out">Out of Stock</option>
+                        <option value="expiring">Expiring Soon</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="filterStockReport()">Apply Filter</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Medicine Name</th>
+                                <th>Batch No.</th>
+                                <th>Category</th>
+                                <th>Total Qty</th>
+                                <th>Sold Qty</th>
+                                <th>Available Qty</th>
+                                <th>Stock Status</th>
+                                <th>Expiry Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockReportTable">
+                            <!-- Stock data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../scripts/api-service.js"></script>
+    <script>
+        // Load reports data
+        async function loadReports() {
+            await Promise.all([
+                loadDashboardStats(),
+                loadSalesReport(),
+                loadStockReport()
+            ]);
+        }
+
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            try {
+                const stats = await apiService.getDashboardStats();
+                const statsGrid = document.getElementById('statsGrid');
+                
+                statsGrid.innerHTML = `
+                    <div class="stat-card sales">
+                        <h3>Total Sales</h3>
+                        <div class="stat-number">₹${Number(stats.totalSales || 0).toLocaleString('en-IN')}</div>
+                        <div class="stat-change">All time sales</div>
+                    </div>
+                    <div class="stat-card orders">
+                        <h3>Total Orders</h3>
+                        <div class="stat-number">${stats.totalOrders || 0}</div>
+                        <div class="stat-change">All orders</div>
+                    </div>
+                    <div class="stat-card medicines">
+                        <h3>Total Medicines</h3>
+                        <div class="stat-number">${stats.totalMedicines || 0}</div>
+                        <div class="stat-change">In inventory</div>
+                    </div>
+                    <div class="stat-card revenue">
+                        <h3>Orders Today</h3>
+                        <div class="stat-number">${stats.ordersToday || 0}</div>
+                        <div class="stat-change">Pending: ${stats.pendingOrders || 0}</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        // Load sales report
+        async function loadSalesReport() {
+            try {
+                const orders = await apiService.getOrders();
+                const tableBody = document.getElementById('salesReportTable');
+                
+                if (orders.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px;">No sales data available</td></tr>';
+                    return;
+                }
+
+                // Sort by date (newest first)
+                orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                tableBody.innerHTML = orders.map(order => {
+                    const date = new Date(order.createdAt).toLocaleDateString('en-IN');
+                    return `
+                        <tr>
+                            <td>${date}</td>
+                            <td>${order.orderId}</td>
+                            <td>${order.customer?.name || order.shippingAddress?.name || 'Guest'}</td>
+                            <td>₹${Number(order.totalAmount || 0).toFixed(2)}</td>
+                            <td><span style="padding: 5px 10px; border-radius: 15px; background: ${getStatusColor(order.orderStatus)}; color: white; font-size: 12px;">${order.orderStatus || 'pending'}</span></td>
+                            <td>${order.paymentMethod || 'N/A'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading sales report:', error);
+                document.getElementById('salesReportTable').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px; color: #e74c3c;">Failed to load sales data</td></tr>';
+            }
+        }
+
+        // Load stock report
+        async function loadStockReport() {
+            try {
+                const medicines = await apiService.getMedicines();
+                const tableBody = document.getElementById('stockReportTable');
+                
+                if (medicines.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px;">No medicines in inventory</td></tr>';
+                    return;
+                }
+
+                tableBody.innerHTML = medicines.map(medicine => {
+                    const availableQty = (medicine.totalQty || 0) - (medicine.soldQty || 0);
+                    let stockStatus = 'Out of Stock';
+                    let statusColor = '#e74c3c';
+                    if (availableQty > 10) {
+                        stockStatus = 'In Stock';
+                        statusColor = '#27ae60';
+                    } else if (availableQty > 0) {
+                        stockStatus = 'Low Stock';
+                        statusColor = '#f39c12';
+                    }
+
+                    const expiryDate = medicine.expiryDate ? new Date(medicine.expiryDate).toLocaleDateString('en-IN') : 'N/A';
+                    const isExpiringSoon = medicine.expiryDate && new Date(medicine.expiryDate) < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+
+                    return `
+                        <tr>
+                            <td>${medicine.name}</td>
+                            <td>${medicine.batchNo || 'N/A'}</td>
+                            <td>${(medicine.category || '').charAt(0).toUpperCase() + (medicine.category || '').slice(1)}</td>
+                            <td>${medicine.totalQty || 0}</td>
+                            <td>${medicine.soldQty || 0}</td>
+                            <td><strong>${availableQty}</strong></td>
+                            <td><span style="padding: 5px 10px; border-radius: 15px; background: ${statusColor}; color: white; font-size: 12px;">${stockStatus}</span></td>
+                            <td style="${isExpiringSoon ? 'color: #e74c3c; font-weight: bold;' : ''}">${expiryDate}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading stock report:', error);
+                document.getElementById('stockReportTable').innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px; color: #e74c3c;">Failed to load stock data</td></tr>';
+            }
+        }
+
+        // Filter sales report by date
+        function filterSalesReport() {
+            const startDate = document.getElementById('salesStartDate').value;
+            const endDate = document.getElementById('salesEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+
+            // Reload and filter client-side
+            loadSalesReport().then(() => {
+                const rows = document.querySelectorAll('#salesReportTable tr');
+                rows.forEach(row => {
+                    const dateCell = row.querySelector('td');
+                    if (dateCell) {
+                        const rowDate = new Date(dateCell.textContent);
+                        const start = new Date(startDate);
+                        const end = new Date(endDate);
+                        end.setHours(23, 59, 59);
+                        
+                        if (rowDate < start || rowDate > end) {
+                            row.style.display = 'none';
+                        } else {
+                            row.style.display = '';
+                        }
+                    }
+                });
+            });
+        }
+
+        // Clear sales filter
+        function clearSalesFilter() {
+            document.getElementById('salesStartDate').value = '';
+            document.getElementById('salesEndDate').value = '';
+            loadSalesReport();
+        }
+
+        // Filter stock report
+        function filterStockReport() {
+            const filter = document.getElementById('stockFilter').value;
+            const rows = document.querySelectorAll('#stockReportTable tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 0) return;
+
+                const availableQtyCell = cells[5];
+                const stockStatusCell = cells[6];
+                const expiryDateCell = cells[7];
+
+                if (!availableQtyCell || !stockStatusCell) return;
+
+                const availableQty = parseInt(availableQtyCell.textContent) || 0;
+                const stockStatus = stockStatusCell.textContent.trim();
+                const expiryDate = expiryDateCell.textContent;
+
+                let show = true;
+
+                if (filter === 'low') {
+                    show = availableQty > 0 && availableQty <= 10;
+                } else if (filter === 'out') {
+                    show = availableQty === 0;
+                } else if (filter === 'expiring') {
+                    const expiry = new Date(expiryDate);
+                    const threeMonthsFromNow = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+                    show = expiry < threeMonthsFromNow && expiry > new Date();
+                }
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        // Get status color
+        function getStatusColor(status) {
+            const colors = {
+                'pending': '#f39c12',
+                'confirmed': '#3498db',
+                'shipped': '#9b59b6',
+                'delivered': '#27ae60',
+                'cancelled': '#e74c3c'
+            };
+            return colors[status?.toLowerCase()] || '#95a5a6';
+        }
+
+        // Refresh all reports
+        function refreshReports() {
+            loadReports();
+        }
+
+        // Logout function
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+                localStorage.removeItem('isAdminLoggedIn');
+                localStorage.removeItem('adminLoggedIn');
+                localStorage.removeItem('adminUsername');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
+
+            await loadReports();
+        });
+    </script>
+</body>
+</html>
+

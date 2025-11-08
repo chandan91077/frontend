@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - Anvik Biotecch</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/admin.css">
+</head>
+<body class="admin-body">
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Anvik Biotecch</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                    <li><a href="dashboard.html#medicines-stock" class="nav-link">Medicines Stock</a></li>
+                    <li><a href="sales.html" class="nav-link active">Sales</a></li>
+                    <li><a href="reports.html" class="nav-link">Reports</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Sales Report</h1>
+                <div class="header-actions">
+                    <span>Welcome, Admin</span>
+                    <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+                </div>
+            </header>
+
+            <section class="section">
+                <div class="sales-stats">
+                    <div class="stat-card">
+                        <h3>Total Sales</h3>
+                        <p class="stat-number">₹45,670</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Orders Today</h3>
+                        <p class="stat-number">24</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pending Orders</h3>
+                        <p class="stat-number">8</p>
+                    </div>
+                </div>
+
+                <div class="filters" style="display:flex;gap:12px;align-items:center;margin:18px 0;flex-wrap:wrap;">
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <label for="startDate" style="font-weight:600;color:#333;">Start</label>
+                        <input type="date" id="startDate" />
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <label for="endDate" style="font-weight:600;color:#333;">End</label>
+                        <input type="date" id="endDate" />
+                    </div>
+                    <button id="applyDateFilterBtn" class="btn btn-primary">Apply Date Filter</button>
+
+                    <div style="display:flex;gap:6px;align-items:center;margin-left:8px;">
+                        <label for="monthPicker" style="font-weight:600;color:#333;">Month</label>
+                        <input type="month" id="monthPicker" />
+                    </div>
+                    <button id="applyMonthFilterBtn" class="btn btn-primary">Filter Month</button>
+
+                    <button id="clearFiltersBtn" class="btn btn-secondary">Clear Filters</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersList">
+                            <!-- Orders will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../scripts/api-service.js"></script>
+    <script src="../scripts/admin-api.js"></script>
+    <script src="../scripts/admin.js"></script>
+</body>
+</html>

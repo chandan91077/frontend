@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success - Anvik Biotecch</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/customer.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>Anvik Biotecch</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="products.html" class="nav-link">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a href="cart.html" class="nav-link">Cart (<span id="cartCount">0</span>)</a>
+                </li>
+                <li class="nav-item" id="authSection">
+                    <!-- This will be populated by JavaScript -->
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="customer-main">
+        <div class="container">
+            <div class="success-message">
+                <div class="success-icon">✅</div>
+                <h1>Order Placed Successfully!</h1>
+                <p>Thank you for your purchase. Your order has been confirmed.</p>
+                <p><strong>Order ID:</strong> <span id="orderId"></span></p>
+                <p>You will receive a confirmation email shortly.</p>
+                <div class="success-actions">
+                    <a href="products.html" class="btn btn-primary">Continue Shopping</a>
+                    <a href="orders.html" class="btn btn-secondary">View Orders</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../scripts/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderId = localStorage.getItem('lastOrderId');
+            if (orderId) {
+                document.getElementById('orderId').textContent = orderId;
+                // Verify payment status with backend and poll until final
+                verifyPaymentStatus(orderId);
+            }
+        });
+
+        async function verifyPaymentStatus(orderId) {
+            const statusEl = document.createElement('p');
+            statusEl.id = 'paymentStatus';
+            statusEl.textContent = 'Checking payment status...';
+            document.querySelector('.success-message').appendChild(statusEl);
+
+            async function checkOnce() {
+                try {
+                    const res = await fetch(`/api/payments/cashfree/verify/${orderId}`, {
+                        headers: authService.getAuthHeaders()
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                        statusEl.textContent = 'Unable to verify payment: ' + (data.error || res.statusText);
+                        return;
+                    }
+
+                    statusEl.textContent = `Payment status: ${data.paymentStatus || 'pending'}; Order status: ${data.orderStatus || ''}`;
+
+                    if (data.paymentStatus === 'completed' || data.paymentStatus === 'failed') {
+                        // final
+                        if (data.paymentStatus === 'completed') {
+                            statusEl.textContent = 'Payment successful. Thank you!';
+                            // clear cart now that payment succeeded
+                            localStorage.removeItem('cart');
+                            updateCartCount();
+                        } else {
+                            statusEl.textContent = 'Payment failed or cancelled. Please try again.';
+                        }
+                        return;
+                    }
+
+                    // keep polling until final
+                    setTimeout(checkOnce, 4000);
+                } catch (err) {
+                    statusEl.textContent = 'Error checking payment status.';
+                    console.error('Verification error', err);
+                }
+            }
+
+            checkOnce();
+        }
+    </script>
+</body>
+</html>

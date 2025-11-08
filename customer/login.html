@@ -6,6 +6,9 @@
     <title>Customer Login - Anvik Biotecch</title>
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/customer.css">
+
+    <!-- ✅ Load ENV file -->
+    <script src="../env.js"></script>
 </head>
 <body class="login-body">
     <nav class="navbar">
@@ -84,108 +87,84 @@
         </div>
     </div>
 
-    <script>
-        function showTab(tabName) {
-            // Hide all forms
-            document.querySelectorAll('.auth-form').forEach(form => {
-                form.classList.remove('active');
+<script>
+    const API = window.ENV.API_URL; // ✅ backend from env.js
+
+    function showTab(tabName) {
+        document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabName + 'Form').classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // ✅ Login
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+            const response = await fetch(`${API}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
             });
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected form and activate tab
-            document.getElementById(tabName + 'Form').classList.add('active');
-            event.target.classList.add('active');
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Login failed');
+
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('isCustomerLoggedIn', 'true');
+
+            alert('Login successful!');
+            window.location.href = 'products.html';
+
+        } catch (error) {
+            alert('Login failed: ' + error.message);
         }
+    });
 
-        // Login Form Handler
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            try {
-                const response = await fetch('http://localhost:3000/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ username, password })
-                });
+    // ✅ Signup
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-                const data = await response.json();
+        const password = document.getElementById('signupPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        if (password !== confirmPassword) return alert('Passwords do not match!');
 
-                if (!response.ok) {
-                    throw new Error(data.error || 'Login failed');
-                }
+        const userData = {
+            username: document.getElementById('signupUsername').value,
+            password,
+            name: document.getElementById('signupName').value,
+            email: document.getElementById('signupEmail').value,
+            phone: document.getElementById('signupPhone').value,
+            role: 'customer'
+        };
 
-                // Store token and user data
-                localStorage.setItem('authToken', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                localStorage.setItem('isCustomerLoggedIn', 'true');
-                
-                alert('Login successful!');
-                // Redirect to products page or previous page
-                const returnUrl = localStorage.getItem('returnUrl') || 'products.html';
-                window.location.href = returnUrl;
-                
-            } catch (error) {
-                alert('Login failed: ' + error.message);
-            }
-        });
+        try {
+            const response = await fetch(`${API}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
 
-        // Signup Form Handler
-        document.getElementById('signupForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const password = document.getElementById('signupPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (password !== confirmPassword) {
-                alert('Passwords do not match!');
-                return;
-            }
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Registration failed');
 
-            const userData = {
-                username: document.getElementById('signupUsername').value,
-                password: password,
-                name: document.getElementById('signupName').value,
-                email: document.getElementById('signupEmail').value,
-                phone: document.getElementById('signupPhone').value,
-                role: 'customer'
-            };
-            
-            try {
-                const response = await fetch('http://localhost:3000/api/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(userData)
-                });
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('isCustomerLoggedIn', 'true');
 
-                const data = await response.json();
+            alert('Registration successful!');
+            window.location.href = 'products.html';
 
-                if (!response.ok) {
-                    throw new Error(data.error || 'Registration failed');
-                }
+        } catch (error) {
+            alert('Registration failed: ' + error.message);
+        }
+    });
+</script>
 
-                // Store token and user data
-                localStorage.setItem('authToken', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                localStorage.setItem('isCustomerLoggedIn', 'true');
-                
-                alert('Registration successful! You are now logged in.');
-                window.location.href = 'products.html';
-                
-            } catch (error) {
-                alert('Registration failed: ' + error.message);
-            }
-        });
-    </script>
 </body>
 </html>

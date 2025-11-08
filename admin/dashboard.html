@@ -551,6 +551,17 @@
                 const expiryDate = formData.get('expiryDate');
                 const category = formData.get('category');
 
+                // Debug logging
+                console.log('=== DEBUG MEDICINE DATA ===');
+                console.log('Medicine Name:', medicineName);
+                console.log('Batch Number:', batchNumber);
+                console.log('Batch Number Length:', batchNumber?.length);
+                console.log('Quantity:', quantityInput);
+                console.log('Price:', priceInput);
+                console.log('Expiry Date:', expiryDate);
+                console.log('Category:', category);
+                console.log('=== END DEBUG ===');
+
                 if (!medicineName) {
                     alert('Please enter medicine name');
                     return;
@@ -585,17 +596,19 @@
                     category: category
                 };
 
-                // Handle image if present
-                const imageFile = formData.get('medicineImage');
-                if (imageFile && imageFile.size > 0) {
-                    try {
-                        const base64Image = await convertImageToBase64(imageFile);
-                        medicineData.image = base64Image;
-                    } catch (imgError) {
-                        console.warn('Failed to process image:', imgError);
-                        // Continue without image if image processing fails
-                    }
-                }
+                // Handle image if present - COMMENTED OUT TEMPORARILY TO FIX 413 ERROR
+                // const imageFile = formData.get('medicineImage');
+                // if (imageFile && imageFile.size > 0) {
+                //     try {
+                //         const base64Image = await convertImageToBase64(imageFile);
+                //         medicineData.image = base64Image;
+                //     } catch (imgError) {
+                //         console.warn('Failed to process image:', imgError);
+                //         // Continue without image if image processing fails
+                //     }
+                // }
+
+                console.log('Complete medicine data:', JSON.stringify(medicineData, null, 2));
 
                 if (editingId) {
                     // When editing, we need to calculate totalQty based on the new available quantity

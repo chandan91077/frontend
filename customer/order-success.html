@@ -6,6 +6,9 @@
     <title>Order Success - Anvik Biotecch</title>
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/customer.css">
+
+    <!-- ✅ Load ENV File -->
+    <script src="../env.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -23,9 +26,7 @@
                 <li class="nav-item">
                     <a href="cart.html" class="nav-link">Cart (<span id="cartCount">0</span>)</a>
                 </li>
-                <li class="nav-item" id="authSection">
-                    <!-- This will be populated by JavaScript -->
-                </li>
+                <li class="nav-item" id="authSection"></li>
             </ul>
         </div>
     </nav>
@@ -47,12 +48,15 @@
     </main>
 
     <script src="../scripts/auth.js"></script>
+
     <script>
+        const API = window.ENV.API_URL; // ✅ backend from env.js
+
         document.addEventListener('DOMContentLoaded', function() {
             const orderId = localStorage.getItem('lastOrderId');
+
             if (orderId) {
                 document.getElementById('orderId').textContent = orderId;
-                // Verify payment status with backend and poll until final
                 verifyPaymentStatus(orderId);
             }
         });
@@ -65,22 +69,27 @@
 
             async function checkOnce() {
                 try {
-                    const res = await fetch(`/api/payments/cashfree/verify/${orderId}`, {
+                    // ✅ Updated with ENV API URL
+                    const res = await fetch(`${API}/api/payments/cashfree/verify/${orderId}`, {
                         headers: authService.getAuthHeaders()
                     });
+
                     const data = await res.json();
+
                     if (!res.ok) {
                         statusEl.textContent = 'Unable to verify payment: ' + (data.error || res.statusText);
                         return;
                     }
 
-                    statusEl.textContent = `Payment status: ${data.paymentStatus || 'pending'}; Order status: ${data.orderStatus || ''}`;
+                    statusEl.textContent = `Payment status: ${data.paymentStatus || 'pending'}; 
+                    Order status: ${data.orderStatus || ''}`;
 
+                    // ✅ Final states: stop polling
                     if (data.paymentStatus === 'completed' || data.paymentStatus === 'failed') {
-                        // final
                         if (data.paymentStatus === 'completed') {
                             statusEl.textContent = 'Payment successful. Thank you!';
-                            // clear cart now that payment succeeded
+
+                            // ✅ Clear cart on success
                             localStorage.removeItem('cart');
                             updateCartCount();
                         } else {
@@ -89,8 +98,9 @@
                         return;
                     }
 
-                    // keep polling until final
+                    // ✅ Poll every 4 seconds
                     setTimeout(checkOnce, 4000);
+
                 } catch (err) {
                     statusEl.textContent = 'Error checking payment status.';
                     console.error('Verification error', err);

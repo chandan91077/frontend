@@ -1,5 +1,7 @@
-// Orders management for customer
+// ✅ Use .env base URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+// Orders management for customer
 let allOrders = [];
 let ordersPollingInterval = null;
 
@@ -22,11 +24,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     loadCustomerOrders();
-    // Start polling for order updates every 10 seconds while on this page
+
+    // Start polling for order updates every 10 seconds
     if (document.getElementById('ordersList')) {
         ordersPollingInterval = setInterval(() => {
             loadCustomerOrders().catch(err => console.error('Polling error:', err));
-        }, 10000); // 10s
+        }, 10000);
     }
 });
 
@@ -42,13 +45,12 @@ async function loadCustomerOrders() {
     try {
         console.log('Loading customer orders...');
 
-        // Check if user is logged in through auth service
         if (!authService.isCustomer()) {
             throw new Error('Please login to view your orders');
         }
 
-        // Use the authenticated request method from authService
-        const response = await fetch('http://localhost:3000/api/customer/orders', {
+        // ✅ Updated to use ENV variable
+        const response = await fetch(`${API_BASE_URL}/api/customer/orders`, {
             method: 'GET',
             headers: authService.getAuthHeaders()
         });
@@ -66,8 +68,7 @@ async function loadCustomerOrders() {
         
     } catch (error) {
         console.error('Failed to load orders:', error);
-        
-        // Show error message to user
+
         const ordersList = document.getElementById('ordersList');
         if (ordersList) {
             ordersList.innerHTML = `
@@ -86,7 +87,6 @@ async function loadCustomerOrders() {
     }
 }
 
-// Rest of the functions remain the same...
 function displayOrders(orders) {
     const ordersList = document.getElementById('ordersList');
     const emptyOrders = document.getElementById('emptyOrders');
@@ -94,17 +94,16 @@ function displayOrders(orders) {
     if (!ordersList || !emptyOrders) return;
     
     if (!orders || orders.length === 0) {
-        if (ordersList) ordersList.style.display = 'none';
-        if (emptyOrders) emptyOrders.style.display = 'block';
+        ordersList.style.display = 'none';
+        emptyOrders.style.display = 'block';
         return;
     }
     
-    if (emptyOrders) emptyOrders.style.display = 'none';
-    if (ordersList) ordersList.style.display = 'block';
-    
-    // Sort orders by date (newest first)
+    emptyOrders.style.display = 'none';
+    ordersList.style.display = 'block';
+
     orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    
+
     ordersList.innerHTML = orders.map(order => `
         <div class="order-card" data-status="${order.orderStatus}">
             <div class="order-header">
@@ -164,7 +163,7 @@ function filterOrders() {
     }
 }
 
-// Update cart count function
+// Update cart count
 function updateCartCount() {
     const cartCount = document.getElementById('cartCount');
     if (cartCount) {

@@ -1,6 +1,6 @@
 class ApiService {
     constructor() {
-        this.baseUrl = 'http://localhost:3000/api';
+        this.baseUrl = 'https://bakend-88v1.onrender.com/api';
     }
 
     getHeaders() {

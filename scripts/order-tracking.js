@@ -1,3 +1,6 @@
+// ✅ Use .env base URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 // Order tracking functionality
 let trackingPollInterval = null;
 
@@ -6,12 +9,13 @@ async function fetchOrderById(orderId) {
 
     // Authenticated customers use the protected endpoint
     if (authService.isCustomer()) {
-        // makeAuthenticatedRequest returns parsed JSON data
-        return await authService.makeAuthenticatedRequest(`http://localhost:3000/api/orders/${orderId}`);
+        return await authService.makeAuthenticatedRequest(
+            `${API_BASE_URL}/api/orders/${orderId}`
+        );
     }
 
     // Guests use the public tracking endpoint
-    const res = await fetch(`http://localhost:3000/api/orders/track/${orderId}`);
+    const res = await fetch(`${API_BASE_URL}/api/orders/track/${orderId}`);
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || `Failed to fetch order: ${res.statusText}`);
@@ -34,7 +38,7 @@ async function trackOrder() {
         displayTrackingResult(order);
         noTrackingResult.style.display = 'none';
 
-        // start polling for status updates for this order every 8 seconds
+        // Start polling for status updates every 8 seconds
         if (trackingPollInterval) clearInterval(trackingPollInterval);
         trackingPollInterval = setInterval(async () => {
             try {
@@ -71,7 +75,7 @@ function displayTrackingResult(order) {
     ];
 
     const currentStatusIndex = statusSteps.findIndex(step => step.status === order.orderStatus);
-    
+
     let trackingHTML = `
         <div class="order-tracking-card">
             <div class="tracking-header">
@@ -80,18 +84,10 @@ function displayTrackingResult(order) {
             </div>
             
             <div class="order-summary">
-                <div class="summary-item">
-                    <strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}
-                </div>
-                <div class="summary-item">
-                    <strong>Total Amount:</strong> ₹${order.totalAmount}
-                </div>
-                <div class="summary-item">
-                    <strong>Payment Method:</strong> ${order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
-                </div>
-                <div class="summary-item">
-                    <strong>Payment Status:</strong> ${order.paymentStatus}
-                </div>
+                <div class="summary-item"><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</div>
+                <div class="summary-item"><strong>Total Amount:</strong> ₹${order.totalAmount}</div>
+                <div class="summary-item"><strong>Payment Method:</strong> ${order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</div>
+                <div class="summary-item"><strong>Payment Status:</strong> ${order.paymentStatus}</div>
             </div>
 
             <div class="tracking-timeline">
@@ -153,7 +149,7 @@ function displayTrackingResult(order) {
 
 function getEstimatedDeliveryDate(orderDate) {
     const deliveryDate = new Date(orderDate);
-    deliveryDate.setDate(deliveryDate.getDate() + 5); // 5 days delivery estimate
+    deliveryDate.setDate(deliveryDate.getDate() + 5);
     return deliveryDate.toLocaleDateString();
 }
 

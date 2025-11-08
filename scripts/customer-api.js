@@ -1,5 +1,5 @@
-// ✅ Load API Base URL from .env
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+// ✅ FIXED: Use direct URL instead of import.meta
+const API_BASE_URL = 'https://bakend-88v1.onrender.com';
 
 let products = [];
 
@@ -116,7 +116,7 @@ async function processPayment() {
     try {
         console.log('Creating order, payload:', orderData);
 
-        // ✅ ✅ API BASE URL USED HERE
+        // ✅ ✅ FIXED: API BASE URL USED HERE
         const response = await fetch(`${API_BASE_URL}/api/orders`, {
             method: 'POST',
             headers: authService.getAuthHeaders(),
@@ -149,7 +149,7 @@ async function processPayment() {
 // ✅ Load Products (updated API)
 async function loadProductsFromDB() {
     try {
-        // ✅ ✅ USE BASE URL
+        // ✅ ✅ FIXED: USE BASE URL
         const response = await fetch(`${API_BASE_URL}/api/medicines`);
         const medicines = await response.json();
         
@@ -170,3 +170,36 @@ async function loadProductsFromDB() {
         products = [];
     }
 }
+
+// Add other missing functions that your code references
+function updateCartCount() {
+    const cartCount = document.getElementById('cartCount');
+    if (cartCount) {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCount.textContent = totalItems;
+    }
+}
+
+function loadFeaturedProducts() {
+    const featuredContainer = document.getElementById('featuredProducts');
+    if (!featuredContainer) return;
+    
+    const featuredProducts = products.slice(0, 6);
+    
+    featuredContainer.innerHTML = featuredProducts.map(product => `
+        <div class="product-card">
+            <div class="product-image">${product.image}</div>
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p class="product-price">₹${product.price}</p>
+                <button onclick="addToCart('${product.id}')" class="btn btn-primary">Add to Cart</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Make functions globally available
+window.addToCart = addToCart;
+window.processPayment = processPayment;
+window.updateCartCount = updateCartCount;

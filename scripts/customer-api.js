@@ -1,4 +1,5 @@
-// Updated customer functionality with authentication requirement
+// ✅ Load API Base URL from .env
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 let products = [];
 
@@ -9,45 +10,35 @@ document.addEventListener('DOMContentLoaded', function() {
 async function initializeCustomerPortal() {
     await loadProductsFromDB();
     
-    // Load featured products on home page
     if (document.getElementById('featuredProducts')) {
         loadFeaturedProducts();
     }
     
-    // Load all products on products page
     if (document.getElementById('productsGrid')) {
         loadAllProducts();
         setupSearchFilter();
     }
     
-    // Load product detail if on product detail page
     if (document.getElementById('productDetail')) {
         loadProductDetail();
     }
     
-    // Load cart display if on cart page
     if (window.location.pathname.includes('cart.html')) {
         displayCart();
     }
     
-    // Check authentication for checkout page
     if (window.location.pathname.includes('checkout.html')) {
-        if (!authService.requireLogin()) {
-            return; // Redirect to login page
-        }
+        if (!authService.requireLogin()) return;
         displayOrderSummary();
     }
     
-    // Check authentication for orders page
     if (window.location.pathname.includes('orders.html')) {
-        if (!authService.requireLogin()) {
-            return; // Redirect to login page
-        }
+        if (!authService.requireLogin()) return;
         await loadCustomerOrders();
     }
 }
 
-// Update add to cart to show login prompt
+// ✅ Add to cart (no API update required)
 function addToCart(productId, quantity = 1) {
     if (!authService.isCustomer()) {
         if (confirm('You need to login to add items to cart. Would you like to login now?')) {
@@ -57,7 +48,6 @@ function addToCart(productId, quantity = 1) {
         return;
     }
 
-    // Existing add to cart logic
     const product = products.find(p => p.id === productId);
     
     if (product) {
@@ -67,10 +57,7 @@ function addToCart(productId, quantity = 1) {
         if (existingItem) {
             existingItem.quantity += quantity;
         } else {
-            cart.push({
-                ...product,
-                quantity: quantity
-            });
+            cart.push({...product, quantity});
         }
         
         localStorage.setItem('cart', JSON.stringify(cart));
@@ -83,11 +70,9 @@ function addToCart(productId, quantity = 1) {
     }
 }
 
-// Update checkout process to require authentication
+// ✅ Checkout API (updated)
 async function processPayment() {
-    if (!authService.requireLogin()) {
-        return;
-    }
+    if (!authService.requireLogin()) return;
 
     const shippingForm = document.getElementById('shippingForm');
     const paymentMethod = document.getElementById('paymentMethod').value;
@@ -110,7 +95,6 @@ async function processPayment() {
 
     const orderData = {
         items: cart.map(item => ({
-            // Cart may store id as `id` or `_id` depending on where it was added—support both
             medicine: item._id || item.id || item.medicine,
             name: item.name,
             price: item.price,
@@ -125,14 +109,15 @@ async function processPayment() {
             state: formData.get('state'),
             pincode: formData.get('pincode')
         },
-        paymentMethod: paymentMethod,
+        paymentMethod,
         totalAmount: total
     };
 
     try {
         console.log('Creating order, payload:', orderData);
 
-        const response = await fetch('http://localhost:3000/api/orders', {
+        // ✅ ✅ API BASE URL USED HERE
+        const response = await fetch(`${API_BASE_URL}/api/orders`, {
             method: 'POST',
             headers: authService.getAuthHeaders(),
             body: JSON.stringify(orderData)
@@ -142,18 +127,14 @@ async function processPayment() {
         let data;
         try {
             data = JSON.parse(responseText);
-        } catch (e) {
+        } catch {
             data = { raw: responseText };
         }
 
         if (!response.ok) {
-            console.error('Order creation failed, status:', response.status, 'body:', data);
             throw new Error(data.error || data.message || `Server responded with ${response.status}`);
         }
 
-        console.log('Order created successfully:', data);
-
-        // Clear cart and redirect to success page
         localStorage.removeItem('cart');
         updateCartCount();
         localStorage.setItem('lastOrderId', data.order.orderId);
@@ -161,14 +142,15 @@ async function processPayment() {
         
     } catch (error) {
         console.error('Order failed:', error);
-        alert('Order failed: ' + error.message + '\nOpen browser console for more details.');
+        alert('Order failed: ' + error.message);
     }
 }
 
-// Rest of the existing functions remain the same...
+// ✅ Load Products (updated API)
 async function loadProductsFromDB() {
     try {
-        const response = await fetch('http://localhost:3000/api/medicines');
+        // ✅ ✅ USE BASE URL
+        const response = await fetch(`${API_BASE_URL}/api/medicines`);
         const medicines = await response.json();
         
         products = medicines.map(medicine => ({

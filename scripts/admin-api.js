@@ -260,7 +260,7 @@ async function loadOrdersFromDB() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${order.orderId || order._id || '—'}</td>
-                <td>${order.customerName || order.customer || '—'}</td>
+                <td>${order.customer?.name || order.customerName || 'Unknown'}</td>
                 <td>₹${order.totalAmount || order.total || 0}</td>
                 <td class="order-status-cell ${getStatusColorClass(order.orderStatus || order.status)}">
                 ${order.orderStatus || order.status || 'Pending'}
@@ -355,6 +355,94 @@ function getStatusColorClass(status) {
     if (s.includes('ship') || s.includes('confirm')) return 'status-shipped'; // Blue
     if (s.includes('pend') || s.includes('process')) return 'status-pending'; // Orange
     return '';
+}
+/* =============================
+   ✅ Date / Month Filter System
+   ============================= */
+document.getElementById('applyDateFilterBtn')?.addEventListener('click', () => {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    if (!start || !end) {
+        alert('Please select both start and end dates!');
+        return;
+    }
+    applyFilterByDate(start, end);
+});
+
+document.getElementById('applyMonthFilterBtn')?.addEventListener('click', () => {
+    const monthValue = document.getElementById('monthPicker').value;
+    if (!monthValue) {
+        alert('Please select a month!');
+        return;
+    }
+    applyFilterByMonth(monthValue);
+});
+
+async function applyFilterByDate(startDate, endDate) {
+    const orders = await adminApi.getOrders();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const filtered = orders.filter(order => {
+        const orderDate = new Date(order.createdAt || order.date);
+        return orderDate >= start && orderDate <= end;
+    });
+
+    displayFilteredOrders(filtered, `Filtered orders from ${startDate} to ${endDate}`);
+}
+
+async function applyFilterByMonth(monthValue) {
+    const orders = await adminApi.getOrders();
+    const [year, month] = monthValue.split('-').map(Number);
+    const filtered = orders.filter(order => {
+        const date = new Date(order.createdAt || order.date);
+        return date.getFullYear() === year && date.getMonth() + 1 === month;
+    });
+
+    displayFilteredOrders(filtered, `Filtered orders for ${monthValue}`);
+}
+
+function displayFilteredOrders(filteredOrders, title) {
+    const ordersList = document.getElementById('ordersList');
+    const filterSummary = document.getElementById('filterSummary');
+    if (!ordersList || !filterSummary) return;
+
+    ordersList.innerHTML = '';
+    if (filteredOrders.length === 0) {
+        ordersList.innerHTML = `<tr><td colspan="6" style="text-align:center;">No orders found</td></tr>`;
+        filterSummary.style.display = 'none';
+        return;
+    }
+
+    let totalSales = 0;
+    let pendingCount = 0;
+
+    filteredOrders.forEach(order => {
+        const status = order.orderStatus || order.status || 'Pending';
+        const color = status === 'Delivered' ? 'green' : status === 'Cancelled' ? 'red' : 'orange';
+        totalSales += parseFloat(order.totalAmount || order.total || 0);
+        if (status.toLowerCase() === 'pending') pendingCount++;
+
+        ordersList.innerHTML += `
+            <tr>
+                <td>${order.orderId || order._id}</td>
+                <td>${order.customer?.name || order.customerName || 'Unknown'}</td>
+                <td>₹${order.totalAmount || order.total}</td>
+                <td style="color:${color};font-weight:600;">${status}</td>
+                <td>${new Date(order.createdAt || order.date).toLocaleDateString()}</td>
+                <td><button class="btn btn-primary btn-sm" onclick="handleUpdateOrderStatus('${order._id || order.orderId}')">Update Status</button></td>
+            </tr>
+        `;
+    });
+
+    filterSummary.innerHTML = `
+        <div style="margin-top:10px; font-size:16px;">
+            <p>📅 <b>${title}</b></p>
+            <p>💰 Total Sales: ₹${totalSales.toLocaleString()}</p>
+            <p>⏳ Pending Orders: ${pendingCount}</p>
+        </div>
+    `;
+    filterSummary.style.display = 'block';
 }
 
 

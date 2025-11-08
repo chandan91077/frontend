@@ -1,5 +1,6 @@
-// ✅ Load API Base URL from .env (Vite/Vercel)
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+// ✅ CORRECT - Use direct URL
+const API_BASE_URL = 'https://bakend-88v1.onrender.com';
 
 // Will store products loaded from database
 let products = [];

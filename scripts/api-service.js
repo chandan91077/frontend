@@ -94,10 +94,10 @@ class ApiService {
         console.log('🔍 api-service.js - Batch number value:', medicineData.batchNumber);
         console.log('🔍 api-service.js - All fields received:', Object.keys(medicineData));
         
-        // Ensure batchNumber is preserved
+        // ✅ FIXED: Convert batchNumber to batchNo for backend
         const dataToSend = {
             name: medicineData.name,
-            batchNumber: medicineData.batchNumber, // ✅ Keep as batchNumber
+            batchNo: medicineData.batchNumber, // ✅ Convert to batchNo
             totalQty: medicineData.totalQty,
             price: medicineData.price,
             expiryDate: medicineData.expiryDate,
@@ -122,9 +122,10 @@ class ApiService {
         // 🔍 DEBUG: Log update data
         console.log('🔍 api-service.js - Update medicine data:', medicineData);
         
+        // ✅ FIXED: Convert batchNumber to batchNo for backend
         const dataToSend = {
             name: medicineData.name,
-            batchNumber: medicineData.batchNumber, // ✅ Keep as batchNumber
+            batchNo: medicineData.batchNumber, // ✅ Convert to batchNo
             totalQty: medicineData.totalQty,
             price: medicineData.price,
             expiryDate: medicineData.expiryDate,

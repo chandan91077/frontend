@@ -89,16 +89,56 @@ class ApiService {
     }
 
     async addMedicine(medicineData) {
+        // 🔍 DEBUG: Log what's being received and sent
+        console.log('🔍 api-service.js - Received medicineData:', medicineData);
+        console.log('🔍 api-service.js - Batch number value:', medicineData.batchNumber);
+        console.log('🔍 api-service.js - All fields received:', Object.keys(medicineData));
+        
+        // Ensure batchNumber is preserved
+        const dataToSend = {
+            name: medicineData.name,
+            batchNumber: medicineData.batchNumber, // ✅ Keep as batchNumber
+            totalQty: medicineData.totalQty,
+            price: medicineData.price,
+            expiryDate: medicineData.expiryDate,
+            category: medicineData.category,
+            soldQty: medicineData.soldQty || 0
+        };
+
+        // Add image if present
+        if (medicineData.image) {
+            dataToSend.image = medicineData.image;
+        }
+
+        console.log('🔍 api-service.js - Final data being sent to backend:', dataToSend);
+        
         return this.request('/medicines', {
             method: 'POST',
-            body: JSON.stringify(medicineData)
+            body: JSON.stringify(dataToSend)
         });
     }
 
     async updateMedicine(id, medicineData) {
+        // 🔍 DEBUG: Log update data
+        console.log('🔍 api-service.js - Update medicine data:', medicineData);
+        
+        const dataToSend = {
+            name: medicineData.name,
+            batchNumber: medicineData.batchNumber, // ✅ Keep as batchNumber
+            totalQty: medicineData.totalQty,
+            price: medicineData.price,
+            expiryDate: medicineData.expiryDate,
+            category: medicineData.category
+        };
+
+        // Add image if present
+        if (medicineData.image) {
+            dataToSend.image = medicineData.image;
+        }
+
         return this.request(`/medicines/${id}`, {
             method: 'PUT',
-            body: JSON.stringify(medicineData)
+            body: JSON.stringify(dataToSend)
         });
     }
 

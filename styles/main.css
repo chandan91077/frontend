@@ -183,3 +183,27 @@ body {
     background-repeat: no-repeat;
     overflow: hidden;
 }
+/* ===============================
+   Order Status Text Color Styles
+================================*/
+
+.status-delivered {
+    color: #2ecc71; /* Green */
+    font-weight: 600;
+}
+
+.status-cancelled {
+    color: #e74c3c; /* Red */
+    font-weight: 600;
+}
+
+.status-shipped {
+    color: #3498db; /* Blue */
+    font-weight: 600;
+}
+
+.status-pending {
+    color: #f39c12; /* Orange */
+    font-weight: 600;
+}
+

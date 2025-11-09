@@ -21,6 +21,12 @@ async function loadProductsFromDB() {
                     ? medicine.availableQty
                     : ((medicine.totalQty || 0) - (medicine.soldQty || 0));
 
+            // ✅ Fixed only this section — rest unchanged
+            const safeImage =
+                medicine.image && medicine.image.trim() !== ""
+                    ? medicine.image
+                    : `https://placehold.co/150x150?text=${encodeURIComponent(medicine.category || 'No+Image')}`;
+
             return {
                 id: medicine._id,
                 name: medicine.name,
@@ -28,7 +34,7 @@ async function loadProductsFromDB() {
                 price: medicine.price,
                 description: medicine.description || '',
                 dosage: medicine.dosage || '',
-                image: medicine.image || getCategoryIcon(medicine.category),
+                image: safeImage, // ✅ use safe image URL always
                 quantity: availableQty
             };
         });

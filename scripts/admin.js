@@ -73,7 +73,14 @@ async function initializeMedicines() {
             else if (availableQty > 0) stockStatus = 'Low Stock';
 
             row.innerHTML = `
-              <td class="px-4 py-3 text-center"><img src="${med.image || 'https://via.placeholder.com/40'}" alt="" class="w-10 h-10 rounded mx-auto" /></td>
+              <td class="px-4 py-3 text-center">
+                <img 
+                  src="${med.image && med.image.trim() !== '' ? med.image : 'https://placehold.co/40x40?text=No+Img'}" 
+                  alt="${med.name}" 
+                  class="w-10 h-10 rounded mx-auto"
+                  onerror="this.src='https://placehold.co/40x40?text=Error';"
+                />
+              </td>
               <td class="px-4 py-3 text-center">${med.name}</td>
               <td class="px-4 py-3 text-center">${med.batchNo}</td>
               <td class="px-4 py-3 text-center">${med.category}</td>

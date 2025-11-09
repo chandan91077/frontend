@@ -506,24 +506,33 @@
                         stockClass = 'stock-in';
                     }
                     
+                    const imageUrl = medicine.image && medicine.image.trim() !== ''
+                      ? medicine.image
+                      : 'https://via.placeholder.com/100?text=No+Image';
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${medicine.image ? `<img src="${medicine.image}" alt="${medicine.name}" class="medicine-thumbnail">` : '<img src="https://via.placeholder.com/50" alt="No image" class="medicine-thumbnail">'}</td>
-                        <td>${medicine.name}</td>
-                        <td>${medicine.batchNumber || medicine.batchNo || 'N/A'}</td>
-                        <td>${(medicine.category || '').charAt(0).toUpperCase() + (medicine.category || '').slice(1)}</td>
-                        <td>₹${parseFloat(medicine.price || 0).toFixed(2)}</td>
-                        <td><span class="stock-badge ${stockClass}">${stockStatus}</span></td>
-                        <td><strong>${availableQty}</strong></td>
-                        <td>${medicine.expiryDate ? new Date(medicine.expiryDate).toLocaleDateString('en-IN') : 'N/A'}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn btn-warning" onclick="showUpdateStockModal('${medicine._id}')">Update Stock</button>
-                                <button class="btn btn-success" onclick="editMedicine('${medicine._id}')">Edit</button>
-                                <button class="btn btn-danger" onclick="deleteMedicine('${medicine._id}')">Delete</button>
-                            </div>
-                        </td>
+                      <td>
+                        <img src="${imageUrl}"
+                             alt="${medicine.name || 'No image'}"
+                             class="medicine-thumbnail"
+                             onerror="this.src='https://via.placeholder.com/100?text=Error';">
+                      </td>
+                      <td>${medicine.name}</td>
+                      <td>${medicine.batchNumber || medicine.batchNo || 'N/A'}</td>
+                      <td>${(medicine.category || '').charAt(0).toUpperCase() + (medicine.category || '').slice(1)}</td>
+                      <td>₹${parseFloat(medicine.price || 0).toFixed(2)}</td>
+                      <td><span class="stock-badge ${stockClass}">${stockStatus}</span></td>
+                      <td><strong>${availableQty}</strong></td>
+                      <td>${medicine.expiryDate ? new Date(medicine.expiryDate).toLocaleDateString('en-IN') : 'N/A'}</td>
+                      <td>
+                          <div class="action-buttons">
+                              <button class="btn btn-warning" onclick="showUpdateStockModal('${medicine._id}')">Update Stock</button>
+                              <button class="btn btn-success" onclick="editMedicine('${medicine._id}')">Edit</button>
+                              <button class="btn btn-danger" onclick="deleteMedicine('${medicine._id}')">Delete</button>
+                          </div>
+                      </td>
                     `;
+
                     medicinesList.appendChild(row);
                 });
             } catch (error) {

@@ -15,3 +15,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+// Prevent dropdown from closing immediately on mobile
+document.querySelectorAll('.dropdown-toggle').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        this.nextElementSibling.classList.toggle('show');
+    });
+});

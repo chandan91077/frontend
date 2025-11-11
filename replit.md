@@ -92,7 +92,17 @@ python -m http.server 5000 --bind 0.0.0.0
 - **Command**: `python -m http.server 5000 --bind 0.0.0.0`
 
 ## Recent Changes
-- **2025-11-11 (Latest Update)**: Added hamburger mobile menu navigation
+- **2025-11-11 (Latest Update)**: Fixed profile dropdown and image loading issues
+  - Updated `scripts/auth.js` to implement click-based dropdown with "My Orders" and "Logout" options
+  - Added dropdown toggle functionality that works on both desktop and mobile
+  - Prevented duplicate event listeners with flag check
+  - Enhanced `scripts/utils.js` with robust image fallback system using SVG data URIs
+  - Fixed image encoding to use `encodeURIComponent` instead of `btoa` to support all characters
+  - Added automatic fallback for broken/missing images across customer, cart, and admin pages
+  - Updated `styles/customer.css` to make dropdowns scrollable on mobile (max-height: 200px)
+  - All image display now gracefully degrades to geometric placeholder when backend images fail to load
+
+- **2025-11-11**: Added hamburger mobile menu navigation
   - Created `scripts/mobile-menu.js` with toggle functionality for mobile navigation
   - Added hamburger menu button (three-line icon) to all HTML pages
   - Implemented collapsible mobile navigation that hides menu items by default on mobile
@@ -122,9 +132,14 @@ The application uses a centralized image resolution helper (`resolveMedicineImag
 - Nested URL: `medicine.image.url` or `medicine.imageUrl`
 - Array format: `medicine.images[0]`
 - Firebase storage links
-- Fallback to placeholder when no image is available
+- SVG-based fallback placeholder when no image is available
 
-All JavaScript files that display medicines (customer.js, admin.js, customer-api.js) now use this helper function.
+**Fallback Image System:**
+- `createFallbackImage()` - Generates a clean geometric SVG placeholder (circle and rectangles)
+- `handleImageError()` - Automatically replaces broken images with fallback SVG
+- Uses `encodeURIComponent` for safe data URI encoding (supports all Unicode characters)
+- Applied across all views: customer.js, cart.js, admin.js, and customer-api.js
+- Images gracefully degrade with `onerror` handlers on all `<img>` tags
 
 ### Mobile Responsiveness
 Comprehensive responsive design implemented with three breakpoints:

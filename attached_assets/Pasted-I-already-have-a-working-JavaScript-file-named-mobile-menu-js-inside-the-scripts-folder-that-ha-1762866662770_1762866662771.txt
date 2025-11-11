@@ -1,0 +1,41 @@
+I already have a working JavaScript file named "mobile-menu.js" inside the "scripts/" folder that handles the mobile menu toggle and dropdown functionality.
+
+Now I want you to update all the HTML files inside the "customer/" folder to include the common navigation bar at the top of each page and the required script tags at the bottom.
+
+The navigation bar should include:
+- The site name “Anvik Biotecch”
+- Navigation links: Home, Products, Cart, and Track Order
+- A dropdown section showing “Hello, chandan yadav” with “My Orders” and “Logout” options
+- Full support for mobile toggle and dropdown functionality
+
+Also, update the CSS (in main.css) so that the “My Orders” and “Logout” dropdown section becomes scrollable on smaller screens.
+
+Apply these updates to all HTML files inside the “customer/” folder:
+- index.html
+- products.html
+- product-detail.html
+- cart.html
+- checkout.html
+- orders.html
+- order-tracking.html
+- login.html
+
+Make sure:
+- The navbar is identical across all customer pages.
+- The dropdown opens properly on mobile and desktop.
+- The dropdown becomes scrollable if it exceeds the mobile screen height.
+- All the required JS files are linked correctly at the bottom of each HTML page.
+
+Additionally, fix the issue where product images are not visible on both the customer and admin sides.  
+The current placeholder URL (https://via.placeholder.com/40) is failing to load with the error “net::ERR_NAME_NOT_RESOLVED.”  
+
+Steps to fix this:
+1. Correct the image loading logic so that product images display properly for both customer and admin panels.  
+2. Add a fallback mechanism — if an uploaded image is missing, invalid, or fails to load, it should automatically show a default placeholder like “no-image.png” from the local assets folder.  
+3. Ensure that this fallback image logic works dynamically for all product cards, product detail pages, and admin product tables.  
+4. Keep the image layout responsive and consistent in all viewports (desktop and mobile).  
+
+End goal:
+✅ A responsive, consistent navbar on all customer pages  
+✅ Scrollable dropdown for “My Orders” and “Logout” on mobile  
+✅ Product images load correctly everywhere, with an automatic fallback “No Image Available” image if missing or broken

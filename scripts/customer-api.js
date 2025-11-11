@@ -153,18 +153,25 @@ async function loadProductsFromDB() {
         const response = await fetch(`${API_BASE_URL}/api/medicines`);
         const medicines = await response.json();
         
-        products = medicines.map(medicine => ({
-            id: medicine._id,
-            name: medicine.name,
-            category: medicine.category,
-            price: medicine.price,
-            description: medicine.description,
-            dosage: medicine.dosage,
-            image: '💊',
-            quantity: medicine.quantity,
-            batchNumber: medicine.batchNumber,
-            expiryDate: medicine.expiryDate
-        }));
+        products = medicines.map(medicine => {
+            const availableQty =
+                medicine.availableQty !== undefined
+                    ? medicine.availableQty
+                    : ((medicine.totalQty || 0) - (medicine.soldQty || 0));
+            
+            return {
+                id: medicine._id,
+                name: medicine.name,
+                category: medicine.category,
+                price: medicine.price,
+                description: medicine.description || '',
+                dosage: medicine.dosage || '',
+                image: window.resolveMedicineImage ? window.resolveMedicineImage(medicine) : (medicine.image || '💊'),
+                quantity: availableQty,
+                batchNumber: medicine.batchNumber,
+                expiryDate: medicine.expiryDate
+            };
+        });
     } catch (error) {
         console.error('Failed to load products:', error);
         products = [];

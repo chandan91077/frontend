@@ -33,11 +33,14 @@ Anvik Biotecch is a healthcare e-commerce platform that provides customers with 
 │   ├── order-tracking.html # Track order status
 │   └── login.html         # Customer authentication
 ├── scripts/               # JavaScript files
+│   ├── utils.js           # Utility functions (image resolution helper)
 │   ├── api-service.js     # API communication layer
 │   ├── auth.js            # Authentication logic
 │   ├── cart.js            # Shopping cart functionality
 │   ├── customer.js        # Customer portal logic
+│   ├── customer-api.js    # Customer API functions
 │   ├── admin.js           # Admin portal logic
+│   ├── admin-api.js       # Admin API functions
 │   └── [other scripts]
 ├── styles/                # CSS stylesheets
 │   ├── main.css           # Global styles
@@ -89,6 +92,13 @@ python -m http.server 5000 --bind 0.0.0.0
 - **Command**: `python -m http.server 5000 --bind 0.0.0.0`
 
 ## Recent Changes
+- **2025-11-11 (Latest)**: Fixed image display and mobile responsiveness
+  - Created `scripts/utils.js` with centralized `resolveMedicineImage()` helper function
+  - Fixed image resolution across all customer and admin portals to handle multiple backend field formats
+  - Added comprehensive mobile responsive CSS with breakpoints at 1024px, 768px, and 480px
+  - Updated all HTML pages to include utils.js script before dependent scripts
+  - Improved navigation menu, product grids, cart layouts, and admin tables for mobile devices
+  
 - **2025-11-11**: Initial project setup in Replit
   - Installed Python 3.11 for HTTP server
   - Configured frontend workflow on port 5000
@@ -96,8 +106,33 @@ python -m http.server 5000 --bind 0.0.0.0
   - Set up deployment configuration
   - Verified all pages load correctly
 
+## Technical Fixes
+
+### Image Resolution System
+The application uses a centralized image resolution helper (`resolveMedicineImage()` in `scripts/utils.js`) that handles multiple backend image field variations:
+- Direct string: `medicine.image`
+- Nested URL: `medicine.image.url` or `medicine.imageUrl`
+- Array format: `medicine.images[0]`
+- Firebase storage links
+- Fallback to placeholder when no image is available
+
+All JavaScript files that display medicines (customer.js, admin.js, customer-api.js) now use this helper function.
+
+### Mobile Responsiveness
+Comprehensive responsive design implemented with three breakpoints:
+- **1024px**: Tablet layout adjustments
+- **768px**: Mobile layout transitions (navigation menu stacking, grid adjustments)
+- **480px**: Small mobile optimizations (single column layouts, reduced padding)
+
+Key responsive features:
+- Hamburger menu for mobile navigation
+- Flexible product grids (4 columns → 3 → 2 → 1)
+- Horizontal scrolling tables on small screens
+- Optimized form layouts and spacing
+
 ## Notes
 - This is a frontend-only application; backend is hosted externally
 - No build process required (static HTML/CSS/JS)
 - Uses Python's built-in HTTP server for simplicity
 - Backend API may need to be running for full functionality
+- All HTML pages include utils.js before other scripts to ensure helper functions are available

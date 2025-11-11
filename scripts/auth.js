@@ -39,39 +39,43 @@ class AuthService {
 
         if (this.isCustomer()) {
             authSection.innerHTML = `
-                <div class="user-dropdown">
-                    <span class="user-greeting dropdown-toggle">Hello, ${this.user.name}</span>
-                    <div class="dropdown-content">
+                <div class="user-dropdown" id="userDropdownContainer">
+                    <button class="user-greeting dropdown-toggle" id="dropdownToggle" type="button">
+                        Hello, ${this.user.name}
+                    </button>
+                    <div class="dropdown-content" id="dropdownMenu">
                         <a href="orders.html">My Orders</a>
-                        <a href="#" onclick="authService.logout(); return false;">Logout</a>
+                        <a href="#" id="logoutLink">Logout</a>
                     </div>
                 </div>
             `;
             
             setTimeout(() => {
-                const dropdown = authSection.querySelector('.user-dropdown');
-                const toggle = authSection.querySelector('.dropdown-toggle');
-                const content = authSection.querySelector('.dropdown-content');
+                const toggle = document.getElementById('dropdownToggle');
+                const menu = document.getElementById('dropdownMenu');
+                const logoutLink = document.getElementById('logoutLink');
                 
-                if (toggle && content) {
-                    toggle.addEventListener('click', function(e) {
+                if (toggle && menu) {
+                    toggle.addEventListener('click', (e) => {
+                        e.preventDefault();
                         e.stopPropagation();
-                        content.classList.toggle('show');
+                        menu.classList.toggle('show');
                     });
                     
-                    if (!this._dropdownClickHandlerAdded) {
-                        document.addEventListener('click', function(event) {
-                            const allDropdowns = document.querySelectorAll('.dropdown-content.show');
-                            allDropdowns.forEach(dropdown => {
-                                if (!dropdown.closest('.user-dropdown').contains(event.target)) {
-                                    dropdown.classList.remove('show');
-                                }
-                            });
-                        });
-                        this._dropdownClickHandlerAdded = true;
-                    }
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('#userDropdownContainer')) {
+                            menu.classList.remove('show');
+                        }
+                    });
                 }
-            }, 0);
+                
+                if (logoutLink) {
+                    logoutLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.logout();
+                    });
+                }
+            }, 100);
         } else {
             authSection.innerHTML = `
                 <a href="login.html" class="nav-link">Login/Signup</a>

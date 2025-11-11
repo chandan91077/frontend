@@ -92,7 +92,15 @@ python -m http.server 5000 --bind 0.0.0.0
 - **Command**: `python -m http.server 5000 --bind 0.0.0.0`
 
 ## Recent Changes
-- **2025-11-11 (Latest)**: Fixed image display and mobile responsiveness
+- **2025-11-11 (Latest Update)**: Added hamburger mobile menu navigation
+  - Created `scripts/mobile-menu.js` with toggle functionality for mobile navigation
+  - Added hamburger menu button (three-line icon) to all HTML pages
+  - Implemented collapsible mobile navigation that hides menu items by default on mobile
+  - Menu items now hidden behind hamburger icon on screens < 768px
+  - Added smooth transitions and auto-close on outside click
+  - Updated all 13 customer pages + main index.html with mobile menu functionality
+
+- **2025-11-11**: Fixed image display and mobile responsiveness
   - Created `scripts/utils.js` with centralized `resolveMedicineImage()` helper function
   - Fixed image resolution across all customer and admin portals to handle multiple backend field formats
   - Added comprehensive mobile responsive CSS with breakpoints at 1024px, 768px, and 480px
@@ -125,10 +133,15 @@ Comprehensive responsive design implemented with three breakpoints:
 - **480px**: Small mobile optimizations (single column layouts, reduced padding)
 
 Key responsive features:
-- Hamburger menu for mobile navigation
+- **Hamburger Menu**: Three-line icon button appears on mobile (< 768px)
+  - Menu items hidden by default on mobile screens
+  - Smooth slide-down animation when toggled
+  - Auto-closes when clicking outside navigation
+  - Implemented via `scripts/mobile-menu.js`
 - Flexible product grids (4 columns → 3 → 2 → 1)
 - Horizontal scrolling tables on small screens
 - Optimized form layouts and spacing
+- Fixed navbar height (60px) on mobile for better screen space
 
 ## Notes
 - This is a frontend-only application; backend is hosted externally

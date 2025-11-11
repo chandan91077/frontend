@@ -606,17 +606,6 @@
                     category: category
                 };
 
-                // Handle image if present - COMMENTED OUT TEMPORARILY TO FIX 413 ERROR
-                // const imageFile = formData.get('medicineImage');
-                // if (imageFile && imageFile.size > 0) {
-                //     try {
-                //         const base64Image = await convertImageToBase64(imageFile);
-                //         medicineData.image = base64Image;
-                //     } catch (imgError) {
-                //         console.warn('Failed to process image:', imgError);
-                //         // Continue without image if image processing fails
-                //     }
-                // }
                 // Handle image if present
                 const imageFile = formData.get('medicineImage');
                 if (imageFile && imageFile.size > 0) {

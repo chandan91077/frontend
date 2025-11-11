@@ -285,9 +285,9 @@ async function loadOrdersFromDB() {
 }
 
 function updateSalesStats(orders) {
-    const totalSalesElem = document.querySelectorAll('.stat-number')[0];
-    const ordersTodayElem = document.querySelectorAll('.stat-number')[1];
-    const pendingOrdersElem = document.querySelectorAll('.stat-number')[2];
+    const totalSalesElem = document.getElementById('totalSalesCard') || document.querySelectorAll('.stat-number')[0];
+    const ordersTodayElem = document.getElementById('ordersCard') || document.querySelectorAll('.stat-number')[1];
+    const pendingOrdersElem = document.getElementById('pendingOrdersCard') || document.querySelectorAll('.stat-number')[2];
 
     if (!totalSalesElem || !ordersTodayElem || !pendingOrdersElem) return;
 
@@ -296,7 +296,7 @@ function updateSalesStats(orders) {
     const ordersToday = orders.filter(o => (o.createdAt || '').startsWith(today)).length;
     const pendingOrders = orders.filter(o => (o.orderStatus || o.status || '').toLowerCase() === 'pending').length;
 
-    totalSalesElem.textContent = `₹${totalSales.toLocaleString()}`;
+    totalSalesElem.textContent = `₹${totalSales.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
     ordersTodayElem.textContent = ordersToday;
     pendingOrdersElem.textContent = pendingOrders;
 }
@@ -443,6 +443,26 @@ function displayFilteredOrders(filteredOrders, title) {
         </div>
     `;
     filterSummary.style.display = 'block';
+
+    // 🆕 Update the stat cards with filtered data
+    updateStatCards(totalSales, pendingCount, filteredOrders.length);
+}
+
+// 🆕 Function to update stat cards with filtered data
+function updateStatCards(totalSales, pendingCount, totalOrders) {
+    const totalSalesCard = document.getElementById('totalSalesCard');
+    const ordersCard = document.getElementById('ordersCard');
+    const pendingOrdersCard = document.getElementById('pendingOrdersCard');
+
+    if (totalSalesCard) {
+        totalSalesCard.textContent = `₹${totalSales.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+    }
+    if (ordersCard) {
+        ordersCard.textContent = totalOrders;
+    }
+    if (pendingOrdersCard) {
+        pendingOrdersCard.textContent = pendingCount;
+    }
 }
 /* =============================
    ✅ Clear Filters Feature

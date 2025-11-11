@@ -280,38 +280,6 @@
                 </div>
             </section>
 
-            <!-- Sales Report -->
-            <section class="section">
-                <div class="section-header">
-                    <h2>Sales Report</h2>
-                </div>
-                <div class="filter-section">
-                    <label>Date Range:</label>
-                    <input type="date" id="salesStartDate">
-                    <label>to</label>
-                    <input type="date" id="salesEndDate">
-                    <button class="btn btn-primary" onclick="filterSalesReport()">Filter</button>
-                    <button class="btn btn-secondary" onclick="clearSalesFilter()">Clear</button>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Order ID</th>
-                                <th>Customer</th>
-                                <th>Amount (₹)</th>
-                                <th>Status</th>
-                                <th>Payment Method</th>
-                            </tr>
-                        </thead>
-                        <tbody id="salesReportTable">
-                            <!-- Sales data will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
             <!-- Medicine Stock Report -->
             <section class="section">
                 <div class="section-header">
@@ -343,6 +311,42 @@
                         </thead>
                         <tbody id="stockReportTable">
                             <!-- Stock data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Sales Report -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>Sales Report</h2>
+                </div>
+                <div class="filter-section">
+                    <label>Date Range:</label>
+                    <input type="date" id="salesStartDate">
+                    <label>to</label>
+                    <input type="date" id="salesEndDate">
+                    <button class="btn btn-primary" onclick="filterSalesReport()">Filter</button>
+                    <button class="btn btn-secondary" onclick="clearSalesFilter()">Clear</button>
+                    <button class="btn btn-primary" onclick="downloadSalesReportCSV()" style="background: #27ae60; margin-left: auto;">📥 Download CSV</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Customer Contact</th>
+                                <th>Customer Address</th>
+                                <th>Ordered Items</th>
+                                <th>Amount (₹)</th>
+                                <th>Status</th>
+                                <th>Payment Method</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesReportTable">
+                            <!-- Sales data will be populated by JavaScript -->
                         </tbody>
                     </table>
                 </div>
@@ -395,6 +399,9 @@
             }
         }
 
+        // Store orders data globally for CSV export
+        let allOrdersData = [];
+
         // Load sales report
         async function loadSalesReport() {
             try {
@@ -402,20 +409,81 @@
                 const tableBody = document.getElementById('salesReportTable');
                 
                 if (orders.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px;">No sales data available</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 30px;">No sales data available</td></tr>';
+                    allOrdersData = [];
                     return;
                 }
 
                 // Sort by date (newest first)
                 orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                
+                // Store all orders for CSV export
+                allOrdersData = orders;
 
                 tableBody.innerHTML = orders.map(order => {
                     const date = new Date(order.createdAt).toLocaleDateString('en-IN');
+                    const customerName = order.customer?.name || order.shippingAddress?.name || 'Guest';
+                    const customerPhone = order.customer?.phone || order.shippingAddress?.phone || 'N/A';
+                    const customerEmail = order.customer?.email || order.shippingAddress?.email || 'N/A';
+                    const customerContact = customerPhone !== 'N/A' ? customerPhone : (customerEmail !== 'N/A' ? customerEmail : 'N/A');
+                    
+                    // Build FULL address - handle both customer object and shippingAddress
+                    let customerAddress = 'N/A';
+                    let addressParts = [];
+                    
+                    // Try customer object first (support both 'street' and 'address' fields)
+                    if (order.customer?.address) {
+                        const addr = order.customer.address;
+                        const line1 = addr.street || addr.address || '';
+                        if (line1) addressParts.push(line1);
+                        if (addr.city) addressParts.push(addr.city);
+                        if (addr.state) addressParts.push(addr.state);
+                        if (addr.pincode) addressParts.push(addr.pincode);
+                    }
+                    // Fall back to shippingAddress
+                    else if (order.shippingAddress) {
+                        const addr = order.shippingAddress;
+                        if (addr.address) addressParts.push(addr.address);
+                        if (addr.city) addressParts.push(addr.city);
+                        if (addr.state) addressParts.push(addr.state);
+                        if (addr.pincode) addressParts.push(addr.pincode);
+                    }
+                    
+                    // Join all address parts with comma
+                    if (addressParts.length > 0) {
+                        customerAddress = addressParts.join(', ');
+                    }
+                    
+                    // Build ordered items list
+                    let itemsList = 'N/A';
+                    if (order.items && order.items.length > 0) {
+                        const itemDetails = order.items.map(item => {
+                            const medicineName = item.medicine?.name || item.name || 'Unknown';
+                            const qty = item.quantity || 0;
+                            return `${medicineName} (${qty})`;
+                        }).join(', ');
+                        
+                        // If many items, use a collapsible dropdown
+                        if (order.items.length > 2) {
+                            itemsList = `<details style="cursor: pointer;">
+                                <summary style="font-weight: 500; color: #3498db;">View ${order.items.length} items</summary>
+                                <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 12px;">
+                                    ${itemDetails}
+                                </div>
+                            </details>`;
+                        } else {
+                            itemsList = itemDetails;
+                        }
+                    }
+                    
                     return `
                         <tr>
                             <td>${date}</td>
                             <td>${order.orderId}</td>
-                            <td>${order.customer?.name || order.shippingAddress?.name || 'Guest'}</td>
+                            <td>${customerName}</td>
+                            <td>${customerContact}</td>
+                            <td style="word-break: break-word; max-width: 250px;">${customerAddress}</td>
+                            <td>${itemsList}</td>
                             <td>₹${Number(order.totalAmount || 0).toFixed(2)}</td>
                             <td><span style="padding: 5px 10px; border-radius: 15px; background: ${getStatusColor(order.orderStatus)}; color: white; font-size: 12px;">${order.orderStatus || 'pending'}</span></td>
                             <td>${order.paymentMethod || 'N/A'}</td>
@@ -424,7 +492,8 @@
                 }).join('');
             } catch (error) {
                 console.error('Error loading sales report:', error);
-                document.getElementById('salesReportTable').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px; color: #e74c3c;">Failed to load sales data</td></tr>';
+                document.getElementById('salesReportTable').innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 30px; color: #e74c3c;">Failed to load sales data</td></tr>';
+                allOrdersData = [];
             }
         }
 
@@ -511,7 +580,131 @@
             loadSalesReport();
         }
 
-        // Filter stock report
+        // Download Sales Report as CSV
+        function downloadSalesReportCSV() {
+            try {
+                const startDate = document.getElementById('salesStartDate').value;
+                const endDate = document.getElementById('salesEndDate').value;
+                
+                // Filter orders based on date range
+                let ordersToExport = allOrdersData;
+                
+                if (startDate && endDate) {
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    end.setHours(23, 59, 59);
+                    
+                    ordersToExport = allOrdersData.filter(order => {
+                        const orderDate = new Date(order.createdAt);
+                        return orderDate >= start && orderDate <= end;
+                    });
+                    
+                    if (ordersToExport.length === 0) {
+                        alert('No data available for the selected date range');
+                        return;
+                    }
+                }
+                
+                // Prepare CSV headers
+                const headers = ['Date', 'Order ID', 'Customer', 'Customer Contact', 'Customer Address', 'Ordered Items', 'Amount (₹)', 'Status', 'Payment Method'];
+                
+                // Prepare CSV rows
+                const rows = ordersToExport.map(order => {
+                    const date = new Date(order.createdAt).toLocaleDateString('en-IN');
+                    const customerName = order.customer?.name || order.shippingAddress?.name || 'Guest';
+                    const customerPhone = order.customer?.phone || order.shippingAddress?.phone || 'N/A';
+                    const customerEmail = order.customer?.email || order.shippingAddress?.email || 'N/A';
+                    const customerContact = customerPhone !== 'N/A' ? customerPhone : (customerEmail !== 'N/A' ? customerEmail : 'N/A');
+                    
+                    // Build FULL address - handle both customer object and shippingAddress
+                    let customerAddress = 'N/A';
+                    let addressParts = [];
+                    
+                    // Try customer object first (support both 'street' and 'address' fields)
+                    if (order.customer?.address) {
+                        const addr = order.customer.address;
+                        const line1 = addr.street || addr.address || '';
+                        if (line1) addressParts.push(line1);
+                        if (addr.city) addressParts.push(addr.city);
+                        if (addr.state) addressParts.push(addr.state);
+                        if (addr.pincode) addressParts.push(addr.pincode);
+                    }
+                    // Fall back to shippingAddress
+                    else if (order.shippingAddress) {
+                        const addr = order.shippingAddress;
+                        if (addr.address) addressParts.push(addr.address);
+                        if (addr.city) addressParts.push(addr.city);
+                        if (addr.state) addressParts.push(addr.state);
+                        if (addr.pincode) addressParts.push(addr.pincode);
+                    }
+                    
+                    // Join all address parts with comma
+                    if (addressParts.length > 0) {
+                        customerAddress = addressParts.join(', ');
+                    }
+                    
+                    // Build items list
+                    let itemsText = 'N/A';
+                    if (order.items && order.items.length > 0) {
+                        itemsText = order.items.map(item => {
+                            const medicineName = item.medicine?.name || item.name || 'Unknown';
+                            const qty = item.quantity || 0;
+                            return `${medicineName} (${qty})`;
+                        }).join('; ');
+                    }
+                    
+                    return [
+                        date,
+                        order.orderId,
+                        customerName,
+                        customerContact,
+                        customerAddress,
+                        itemsText,
+                        parseFloat(order.totalAmount || 0).toFixed(2),
+                        order.orderStatus || 'pending',
+                        order.paymentMethod || 'N/A'
+                    ];
+                });
+                
+                // Convert to CSV format
+                let csvContent = headers.map(h => `"${h}"`).join(',') + '\n';
+                csvContent += rows.map(row => 
+                    row.map(cell => {
+                        // Escape quotes and wrap in quotes
+                        const escaped = String(cell).replace(/"/g, '""');
+                        return `"${escaped}"`;
+                    }).join(',')
+                ).join('\n');
+                
+                // Create blob and download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                // Set filename with date range if filtered
+                let filename = 'sales_report';
+                if (startDate && endDate) {
+                    filename += `_${startDate}_to_${endDate}`;
+                } else {
+                    const today = new Date().toISOString().split('T')[0];
+                    filename += `_all_${today}`;
+                }
+                filename += '.csv';
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                alert(`CSV exported successfully! (${ordersToExport.length} orders)`);
+            } catch (error) {
+                console.error('Error downloading CSV:', error);
+                alert('Failed to download CSV: ' + error.message);
+            }
+        }
         function filterStockReport() {
             const filter = document.getElementById('stockFilter').value;
             const rows = document.querySelectorAll('#stockReportTable tr');

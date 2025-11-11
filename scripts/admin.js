@@ -72,14 +72,15 @@ async function initializeMedicines() {
             if (availableQty > 10) stockStatus = 'In Stock';
             else if (availableQty > 0) stockStatus = 'Low Stock';
 
-            const imageUrl = window.resolveMedicineImage ? window.resolveMedicineImage(med) : (med.image || 'https://placehold.co/40x40?text=No+Img');
+            const imageUrl = window.resolveMedicineImage ? window.resolveMedicineImage(med) : null;
+            const imgSrc = imageUrl || (window.createFallbackImage ? window.createFallbackImage() : '');
             row.innerHTML = `
               <td class="px-4 py-3 text-center">
                 <img 
-                  src="${imageUrl}" 
+                  src="${imgSrc}" 
                   alt="${med.name}" 
                   class="w-10 h-10 rounded mx-auto"
-                  onerror="this.src='https://placehold.co/40x40?text=Error';"
+                  onerror="if(window.handleImageError) window.handleImageError(this, '${med.category || 'medicine'}');"
                 />
               </td>
               <td class="px-4 py-3 text-center">${med.name}</td>

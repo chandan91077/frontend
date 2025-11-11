@@ -618,17 +618,21 @@
     padding: 8px 16px;
     border: 1px solid var(--primary-color);
     border-radius: 5px;
+    white-space: nowrap;
 }
 
 .dropdown-content {
     display: none;
     position: absolute;
     right: 0;
+    top: 100%;
+    margin-top: 5px;
     background: var(--white);
     min-width: 160px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     border-radius: 5px;
-    z-index: 1;
+    z-index: 1001;
+    overflow-y: auto;
 }
 
 .dropdown-content a {
@@ -637,6 +641,7 @@
     text-decoration: none;
     display: block;
     transition: background 0.3s;
+    white-space: nowrap;
 }
 
 .dropdown-content a:hover {
@@ -645,6 +650,17 @@
 
 .user-dropdown:hover .dropdown-content {
     display: block;
+}
+
+.dropdown-content.show {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .dropdown-content {
+        max-height: 200px;
+        overflow-y: auto;
+    }
 }
 
 /* Demo credentials */

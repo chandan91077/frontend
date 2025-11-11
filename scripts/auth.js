@@ -40,13 +40,38 @@ class AuthService {
         if (this.isCustomer()) {
             authSection.innerHTML = `
                 <div class="user-dropdown">
-                    <span class="user-greeting">Hello, ${this.user.name}</span>
+                    <span class="user-greeting dropdown-toggle">Hello, ${this.user.name}</span>
                     <div class="dropdown-content">
                         <a href="orders.html">My Orders</a>
-                        <a href="#" onclick="authService.logout()">Logout</a>
+                        <a href="#" onclick="authService.logout(); return false;">Logout</a>
                     </div>
                 </div>
             `;
+            
+            setTimeout(() => {
+                const dropdown = authSection.querySelector('.user-dropdown');
+                const toggle = authSection.querySelector('.dropdown-toggle');
+                const content = authSection.querySelector('.dropdown-content');
+                
+                if (toggle && content) {
+                    toggle.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        content.classList.toggle('show');
+                    });
+                    
+                    if (!this._dropdownClickHandlerAdded) {
+                        document.addEventListener('click', function(event) {
+                            const allDropdowns = document.querySelectorAll('.dropdown-content.show');
+                            allDropdowns.forEach(dropdown => {
+                                if (!dropdown.closest('.user-dropdown').contains(event.target)) {
+                                    dropdown.classList.remove('show');
+                                }
+                            });
+                        });
+                        this._dropdownClickHandlerAdded = true;
+                    }
+                }
+            }, 0);
         } else {
             authSection.innerHTML = `
                 <a href="login.html" class="nav-link">Login/Signup</a>

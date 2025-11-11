@@ -76,8 +76,8 @@ function loadFeaturedProducts() {
         <div class="product-card">
             <div class="product-image">
                 ${product.image
-                    ? `<img src="${product.image}" alt="${product.name}" class="medicine-thumbnail">`
-                    : `<div class="placeholder-image">${getCategoryIcon(product.category)}</div>`
+                    ? `<img src="${product.image}" alt="${product.name}" class="medicine-thumbnail" onerror="window.handleImageError(this, '${product.category}')">`
+                    : `<img src="${window.createFallbackImage()}" alt="${product.name}" class="medicine-thumbnail">`
                 }
             </div>
             <div class="product-info">
@@ -111,8 +111,8 @@ function loadAllProducts() {
         <div class="product-card" data-category="${product.category}">
             <div class="product-image">
                 ${product.image
-                    ? `<img src="${product.image}" alt="${product.name}" class="medicine-thumbnail">`
-                    : `<div class="placeholder-image">${getCategoryIcon(product.category)}</div>`
+                    ? `<img src="${product.image}" alt="${product.name}" class="medicine-thumbnail" onerror="window.handleImageError(this, '${product.category}')">`
+                    : `<img src="${window.createFallbackImage()}" alt="${product.name}" class="medicine-thumbnail">`
                 }
             </div>
             <div class="product-info">
@@ -187,8 +187,8 @@ function loadProductDetail() {
         <div class="product-detail">
             <div class="product-image-large">
                 ${product.image
-                    ? `<img src="${product.image}" alt="${product.name}" class="medicine-image">`
-                    : `<div class="placeholder-image-large">${getCategoryIcon(product.category)}</div>`
+                    ? `<img src="${product.image}" alt="${product.name}" class="medicine-image" onerror="window.handleImageError(this, '${product.category}')">`
+                    : `<img src="${window.createFallbackImage()}" alt="${product.name}" class="medicine-image">`
                 }
             </div>
 

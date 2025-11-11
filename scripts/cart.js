@@ -126,8 +126,8 @@ function displayCart() {
                     <div class="cart-item">
                         <div class="cart-item-image">
                             ${item.image ? 
-                                `<img src="${item.image}" alt="${item.name}" class="medicine-thumbnail">` : 
-                                `<div class="placeholder-image">${item.category === 'syrup' ? '🧴' : item.category === 'injection' ? '💉' : '💊'}</div>`}
+                                `<img src="${item.image}" alt="${item.name}" class="medicine-thumbnail" onerror="if(window.handleImageError) window.handleImageError(this, '${item.category}')">` : 
+                                `<img src="${window.createFallbackImage ? window.createFallbackImage() : ''}" alt="${item.name}" class="medicine-thumbnail">`}
                         </div>
                         <div class="cart-item-details">
                             <div class="cart-item-name">${item.name}</div>

@@ -167,19 +167,21 @@ body {
         gap: 0;
         width: 100%;
         max-height: 0;
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
         transition: max-height 0.3s ease;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
     .nav-menu.active {
-        max-height: 400px;
+        max-height: 600px;
     }
     
     .nav-item {
         width: 100%;
         text-align: center;
         border-bottom: 1px solid var(--border);
+        position: relative;
     }
     
     .nav-link {

@@ -671,15 +671,41 @@
 }
 
 @media (max-width: 768px) {
-    .dropdown-content {
-        max-height: 200px;
-        overflow-y: auto;
-        min-width: 160px;
+    .user-dropdown {
+        display: block;
+        width: 100%;
+        padding: 10px 20px;
     }
     
     .user-greeting {
         font-size: 0.9rem;
-        padding: 6px 12px;
+        padding: 10px 16px;
+        width: 100%;
+        display: block;
+        text-align: center;
+    }
+    
+    .dropdown-content {
+        position: static;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        box-shadow: none;
+        border: none;
+        background: var(--background);
+        margin-top: 10px;
+        border-radius: 5px;
+    }
+    
+    .dropdown-content.show {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .dropdown-content a {
+        text-align: center;
+        padding: 14px 16px;
+        font-size: 0.95rem;
     }
 }
 

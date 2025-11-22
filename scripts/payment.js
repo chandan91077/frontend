@@ -88,10 +88,11 @@ async function processCashfreePayment() {
             console.log('✅ Order created:', created.order.orderId);
             console.log('🔗 Redirecting to payment gateway:', created.paymentLink);
             
-            // Small delay to ensure localStorage is written
+            // ✅ Add a small delay to ensure localStorage is written
             setTimeout(() => {
+                console.log('🔄 Redirecting now...');
                 window.location.href = created.paymentLink;
-            }, 500);
+            }, 800);
         } else {
             alert('Invalid order response from server');
         }

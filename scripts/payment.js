@@ -66,15 +66,18 @@ async function processCashfreePayment() {
         const shipping = subtotal > 500 ? 0 : 50;
         const total = subtotal + shipping;
         
+        console.log('🚀 Starting Cashfree payment process for amount:', total);
+
         // Create a Cashfree payment order via backend
         const created = await createCashfreeOrder(total);
         if (!created) {
+            console.error('❌ Failed to create Cashfree order');
             return;
         }
 
         // Get payment link from response
         if (!created.paymentLink) {
-            console.error('No payment link in response:', created);
+            console.error('❌ No payment link in response:', created);
             alert('Failed to create payment session. Please try again.');
             return;
         }
@@ -82,13 +85,18 @@ async function processCashfreePayment() {
         // Store order ID for verification and redirect to payment page
         if (created.order && created.order.orderId) {
             localStorage.setItem('lastOrderId', created.order.orderId);
-            console.log('Redirecting to Cashfree payment page:', created.paymentLink);
-            window.location.href = created.paymentLink;
+            console.log('✅ Order created:', created.order.orderId);
+            console.log('🔗 Redirecting to payment gateway:', created.paymentLink);
+            
+            // Small delay to ensure localStorage is written
+            setTimeout(() => {
+                window.location.href = created.paymentLink;
+            }, 500);
         } else {
             alert('Invalid order response from server');
         }
     } catch (error) {
-        console.error('Payment processing error:', error);
+        console.error('❌ Payment processing error:', error);
         alert('Payment processing failed. Please try again.');
     }
 }
@@ -216,10 +224,10 @@ async function createCashfreeOrder(amount) {
                 quantity: item.quantity
             })),
             shippingAddress,
-            totalAmount: amount,
-            // Using a temporary webhook.site URL for testing
-            returnUrl: 'https://webhook.site/9a123456-7890-1234-5678-1234567890ab'
+            totalAmount: amount
         };
+
+        console.log('📤 Sending payment order to backend:', payload);
 
         const response = await fetch('https://bakend-88v1.onrender.com/api/payments/cashfree/create-order', {
             method: 'POST',
@@ -233,7 +241,7 @@ async function createCashfreeOrder(amount) {
         let data;
         try {
             const text = await response.text();
-            console.log('Raw server response:', text);
+            console.log('📥 Raw server response:', text);
             
             try {
                 data = JSON.parse(text);
@@ -250,10 +258,11 @@ async function createCashfreeOrder(amount) {
 
             // Validate response has required fields
             if (!data.paymentLink) {
-                console.error('Invalid server response - missing payment link:', data);
+                console.error('❌ Invalid server response - missing payment link:', data);
                 throw new Error('Server response missing payment link');
             }
 
+            console.log('✅ Payment order created successfully');
             return data;
         } catch (error) {
             console.error('Payment creation failed:', error, data);

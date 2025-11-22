@@ -70,50 +70,90 @@
         async function verifyPaymentStatus(orderId) {
             const statusEl = document.createElement('p');
             statusEl.id = 'paymentStatus';
-            statusEl.textContent = 'Checking payment status...';
+            statusEl.textContent = 'Confirming payment...';
             document.querySelector('.success-message').appendChild(statusEl);
 
-            async function checkOnce() {
-                try {
-                    // ✅ Updated with ENV API URL
-                    const res = await fetch(`${API}/api/payments/cashfree/verify/${orderId}`, {
-                        headers: authService.getAuthHeaders()
-                    });
+            try {
+                // ✅ First, try to confirm payment on backend
+                console.log('🔄 Confirming payment for order:', orderId);
+                const confirmRes = await fetch(`${API}/api/payments/confirm/${orderId}`, {
+                    method: 'POST',
+                    headers: authService.getAuthHeaders()
+                });
 
-                    const data = await res.json();
+                const confirmData = await confirmRes.json();
+                console.log('📥 Confirmation response:', confirmData);
 
-                    if (!res.ok) {
-                        statusEl.textContent = 'Unable to verify payment: ' + (data.error || res.statusText);
-                        return;
-                    }
+                if (confirmRes.ok && confirmData.order?.paymentStatus === 'completed') {
+                    console.log('✅ Payment confirmed successfully!');
+                    statusEl.textContent = '✅ Payment confirmed successfully!';
+                    
+                    // ✅ Clear cart on success
+                    localStorage.removeItem('cart');
+                    updateCartCount();
+                    return;
+                }
 
-                    statusEl.textContent = `Payment status: ${data.paymentStatus || 'pending'}; 
-                    Order status: ${data.orderStatus || ''}`;
+                // ✅ If confirmation fails, verify status
+                console.log('🔍 Verifying payment status...');
+                const verifyRes = await fetch(`${API}/api/payments/cashfree/verify/${orderId}`, {
+                    headers: authService.getAuthHeaders()
+                });
 
-                    // ✅ Final states: stop polling
-                    if (data.paymentStatus === 'completed' || data.paymentStatus === 'failed') {
-                        if (data.paymentStatus === 'completed') {
-                            statusEl.textContent = 'Payment successful. Thank you!';
+                const verifyData = await verifyRes.json();
+                console.log('📥 Verification response:', verifyData);
 
-                            // ✅ Clear cart on success
+                if (verifyData.paymentStatus === 'completed') {
+                    statusEl.textContent = '✅ Payment successful. Thank you!';
+                    localStorage.removeItem('cart');
+                    updateCartCount();
+                    return;
+                }
+
+                // ✅ If still pending, show status and poll
+                statusEl.textContent = `Payment status: ${verifyData.paymentStatus || 'pending'}`;
+
+                // ✅ Poll every 3 seconds for updates
+                let pollCount = 0;
+                const pollInterval = setInterval(async () => {
+                    pollCount++;
+                    console.log(`⏳ Polling... attempt ${pollCount}`);
+
+                    try {
+                        const pollRes = await fetch(`${API}/api/payments/cashfree/verify/${orderId}`, {
+                            headers: authService.getAuthHeaders()
+                        });
+
+                        const pollData = await pollRes.json();
+
+                        if (pollData.paymentStatus === 'completed') {
+                            clearInterval(pollInterval);
+                            statusEl.textContent = '✅ Payment confirmed!';
                             localStorage.removeItem('cart');
                             updateCartCount();
-                        } else {
-                            statusEl.textContent = 'Payment failed or cancelled. Please try again.';
+                            return;
+                        } else if (pollData.paymentStatus === 'failed') {
+                            clearInterval(pollInterval);
+                            statusEl.textContent = '❌ Payment failed. Please try again.';
+                            return;
                         }
-                        return;
+
+                        statusEl.textContent = `Status: ${pollData.paymentStatus} (checked ${pollCount} times)`;
+
+                        // ✅ Stop polling after 30 seconds
+                        if (pollCount > 10) {
+                            clearInterval(pollInterval);
+                            statusEl.textContent = 'Payment verification timeout. Your order is ' + pollData.paymentStatus + '. Please check back shortly.';
+                        }
+                    } catch (err) {
+                        console.error('Poll error:', err);
                     }
+                }, 3000);
 
-                    // ✅ Poll every 4 seconds
-                    setTimeout(checkOnce, 4000);
-
-                } catch (err) {
-                    statusEl.textContent = 'Error checking payment status.';
-                    console.error('Verification error', err);
-                }
+            } catch (err) {
+                statusEl.textContent = '⚠️ Error confirming payment. Please refresh to check status.';
+                console.error('Confirmation error', err);
             }
-
-            checkOnce();
         }
     </script>
 </body>

@@ -39,11 +39,12 @@
     <main class="customer-main">
         <div class="container">
             <div class="success-message">
-                <div class="success-icon">✅</div>
-                <h1>Order Placed Successfully!</h1>
-                <p>Thank you for your purchase. Your order has been confirmed.</p>
+                <div class="success-icon" id="successIcon">⏳</div>
+                <h1 id="successTitle">Order Placed - Payment Pending</h1>
+                <p id="successSubtitle">Thank you for your order. Your payment is being processed.</p>
                 <p><strong>Order ID:</strong> <span id="orderId"></span></p>
-                <p>You will receive a confirmation email shortly.</p>
+                <p id="paymentStatus"></p>
+                <p id="successMessage" style="display: none; color: green; font-weight: bold;">You will receive a confirmation email once payment is verified.</p>
                 <div class="success-actions">
                     <a href="products.html" class="btn btn-primary">Continue Shopping</a>
                     <a href="orders.html" class="btn btn-secondary">View Orders</a>
@@ -68,92 +69,77 @@
         });
 
         async function verifyPaymentStatus(orderId) {
-            const statusEl = document.createElement('p');
-            statusEl.id = 'paymentStatus';
-            statusEl.textContent = 'Confirming payment...';
-            document.querySelector('.success-message').appendChild(statusEl);
+            const statusEl = document.getElementById('paymentStatus');
+            statusEl.textContent = 'Checking payment status...';
 
-            try {
-                // ✅ First, try to confirm payment on backend
-                console.log('🔄 Confirming payment for order:', orderId);
-                const confirmRes = await fetch(`${API}/api/payments/confirm/${orderId}`, {
-                    method: 'POST',
-                    headers: authService.getAuthHeaders()
-                });
+            let pollCount = 0;
+            const maxPolls = 20; // Poll for max 60 seconds (3s x 20)
 
-                const confirmData = await confirmRes.json();
-                console.log('📥 Confirmation response:', confirmData);
-
-                if (confirmRes.ok && confirmData.order?.paymentStatus === 'completed') {
-                    console.log('✅ Payment confirmed successfully!');
-                    statusEl.textContent = '✅ Payment confirmed successfully!';
-                    
-                    // ✅ Clear cart on success
-                    localStorage.removeItem('cart');
-                    updateCartCount();
-                    return;
-                }
-
-                // ✅ If confirmation fails, verify status
-                console.log('🔍 Verifying payment status...');
-                const verifyRes = await fetch(`${API}/api/payments/cashfree/verify/${orderId}`, {
-                    headers: authService.getAuthHeaders()
-                });
-
-                const verifyData = await verifyRes.json();
-                console.log('📥 Verification response:', verifyData);
-
-                if (verifyData.paymentStatus === 'completed') {
-                    statusEl.textContent = '✅ Payment successful. Thank you!';
-                    localStorage.removeItem('cart');
-                    updateCartCount();
-                    return;
-                }
-
-                // ✅ If still pending, show status and poll
-                statusEl.textContent = `Payment status: ${verifyData.paymentStatus || 'pending'}`;
-
-                // ✅ Poll every 3 seconds for updates
-                let pollCount = 0;
-                const pollInterval = setInterval(async () => {
+            async function pollPaymentStatus() {
+                try {
                     pollCount++;
-                    console.log(`⏳ Polling... attempt ${pollCount}`);
+                    console.log(`⏳ Checking payment status... attempt ${pollCount}`);
 
-                    try {
-                        const pollRes = await fetch(`${API}/api/payments/cashfree/verify/${orderId}`, {
-                            headers: authService.getAuthHeaders()
-                        });
+                    const res = await fetch(`${API}/api/payments/cashfree/verify/${orderId}`, {
+                        headers: authService.getAuthHeaders()
+                    });
 
-                        const pollData = await pollRes.json();
+                    const data = await res.json();
+                    console.log('📥 Payment status:', data);
 
-                        if (pollData.paymentStatus === 'completed') {
-                            clearInterval(pollInterval);
-                            statusEl.textContent = '✅ Payment confirmed!';
-                            localStorage.removeItem('cart');
-                            updateCartCount();
-                            return;
-                        } else if (pollData.paymentStatus === 'failed') {
-                            clearInterval(pollInterval);
-                            statusEl.textContent = '❌ Payment failed. Please try again.';
-                            return;
-                        }
-
-                        statusEl.textContent = `Status: ${pollData.paymentStatus} (checked ${pollCount} times)`;
-
-                        // ✅ Stop polling after 30 seconds
-                        if (pollCount > 10) {
-                            clearInterval(pollInterval);
-                            statusEl.textContent = 'Payment verification timeout. Your order is ' + pollData.paymentStatus + '. Please check back shortly.';
-                        }
-                    } catch (err) {
-                        console.error('Poll error:', err);
+                    // ✅ PAYMENT COMPLETED - Order is confirmed!
+                    if (data.paymentStatus === 'completed') {
+                        console.log('✅ Payment confirmed successfully!');
+                        
+                        // Update UI for success
+                        document.getElementById('successIcon').textContent = '✅';
+                        document.getElementById('successTitle').textContent = 'Payment Confirmed!';
+                        document.getElementById('successSubtitle').textContent = 'Your order has been placed successfully.';
+                        statusEl.innerHTML = '<strong style="color: green;">✅ Payment confirmed successfully! Your order is confirmed.</strong>';
+                        document.getElementById('successMessage').style.display = 'block';
+                        
+                        // ✅ Clear cart only when payment is actually confirmed
+                        localStorage.removeItem('cart');
+                        updateCartCount();
+                        return;
                     }
-                }, 3000);
 
-            } catch (err) {
-                statusEl.textContent = '⚠️ Error confirming payment. Please refresh to check status.';
-                console.error('Confirmation error', err);
+                    // ❌ PAYMENT FAILED
+                    if (data.paymentStatus === 'failed') {
+                        console.log('❌ Payment failed');
+                        document.getElementById('successIcon').textContent = '❌';
+                        document.getElementById('successTitle').textContent = 'Payment Failed';
+                        statusEl.innerHTML = '<strong style="color: red;">❌ Payment failed. Please try again.</strong>';
+                        return;
+                    }
+
+                    // ⏳ PAYMENT PENDING - Keep waiting
+                    if (data.paymentStatus === 'pending' || !data.paymentStatus) {
+                        statusEl.textContent = `⏳ Waiting for payment confirmation... (${pollCount}/${maxPolls})`;
+                        
+                        // Keep polling until payment is confirmed or timeout
+                        if (pollCount < maxPolls) {
+                            setTimeout(pollPaymentStatus, 3000); // Poll every 3 seconds
+                        } else {
+                            // Timeout - order still pending
+                            statusEl.innerHTML = `
+                                <strong style="color: orange;">⏱️ Payment verification timeout</strong>
+                                <p>Your order is still pending. Payment may take a few moments to process.</p>
+                                <p>Please check back shortly or contact support if payment was completed.</p>
+                            `;
+                            console.log('⏱️ Payment verification timeout after', pollCount * 3, 'seconds');
+                        }
+                        return;
+                    }
+
+                } catch (err) {
+                    console.error('Error checking payment status:', err);
+                    statusEl.textContent = 'Error checking payment status. Please refresh page.';
+                }
             }
+
+            // Start polling
+            pollPaymentStatus();
         }
     </script>
 </body>

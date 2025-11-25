@@ -17,45 +17,45 @@ const adminApi = {
     },
 
     async addMedicine(medicineData) {
-        await this.checkAdminAuth();
+    await this.checkAdminAuth();
 
-        console.log('🔍 admin-api.js - Received medicineData:', medicineData);
+    console.log('🔍 admin-api.js - Received medicineData:', medicineData);
 
-        const dataToSend = {
-            name: medicineData.name,
-            batchNumber: medicineData.batchNumber,
-            totalQty: medicineData.quantity || medicineData.totalQty,
-            price: medicineData.price,
-            expiryDate: medicineData.expiryDate,
-            category: medicineData.category,
-            soldQty: medicineData.soldQty || 0
-        };
+    const dataToSend = {
+        name: medicineData.name,
+        batchNo: medicineData.batchNumber,            // ✔ backend requires batchNo
+        totalQty: medicineData.totalQty || medicineData.quantity,  // ✔ FIXED fallback
+        price: medicineData.price,
+        expiryDate: medicineData.expiryDate,
+        category: medicineData.category,
+        soldQty: medicineData.soldQty || 0
+    };
 
-        if (medicineData.description) dataToSend.description = medicineData.description;
-        if (medicineData.dosage) dataToSend.dosage = medicineData.dosage;
-        if (medicineData.image) dataToSend.image = medicineData.image;
+    if (medicineData.description) dataToSend.description = medicineData.description;
+    if (medicineData.dosage) dataToSend.dosage = medicineData.dosage;
+    if (medicineData.image) dataToSend.image = medicineData.image;
 
-        console.log('🔍 admin-api.js - Sending to apiService:', dataToSend);
-        return await apiService.addMedicine(dataToSend);
+    console.log('🔍 admin-api.js - Sending to apiService:', dataToSend);
+    return await apiService.addMedicine(dataToSend);
     },
 
     async updateMedicine(id, medicineData) {
-        await this.checkAdminAuth();
+    await this.checkAdminAuth();
 
-        const dataToSend = {
-            name: medicineData.name,
-            batchNumber: medicineData.batchNumber,
-            totalQty: medicineData.quantity || medicineData.totalQty,
-            price: medicineData.price,
-            expiryDate: medicineData.expiryDate,
-            category: medicineData.category
-        };
+    const dataToSend = {
+        name: medicineData.name,
+        batchNo: medicineData.batchNumber,            // ✔ FIXED
+        totalQty: medicineData.totalQty || medicineData.quantity,  // ✔ FIXED fallback
+        price: medicineData.price,
+        expiryDate: medicineData.expiryDate,
+        category: medicineData.category
+    };
 
-        if (medicineData.description) dataToSend.description = medicineData.description;
-        if (medicineData.dosage) dataToSend.dosage = medicineData.dosage;
-        if (medicineData.image) dataToSend.image = medicineData.image;
+    if (medicineData.description) dataToSend.description = medicineData.description;
+    if (medicineData.dosage) dataToSend.dosage = medicineData.dosage;
+    if (medicineData.image) dataToSend.image = medicineData.image;
 
-        return await apiService.updateMedicine(id, dataToSend);
+    return await apiService.updateMedicine(id, dataToSend);
     },
 
     async deleteMedicine(id) {

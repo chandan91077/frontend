@@ -122,7 +122,7 @@ if (medicineForm) {
             const medicineData = {
                 name: formData.get('medicineName'),
                 batchNumber: formData.get('batchNumber'),
-                quantity: parseInt(formData.get('quantity')),
+                totalQty: parseInt(formData.get('quantity')),
                 price: parseFloat(formData.get('price')),
                 expiryDate: formData.get('expiryDate'),
                 category: formData.get('category')

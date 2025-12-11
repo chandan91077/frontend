@@ -159,7 +159,11 @@ function getCategoryName(category) {
         tablet: 'Tablets',
         syrup: 'Syrup',
         injection: 'Injection',
-        ointment: 'Ointment'
+        ointment: 'Ointment',
+        soap: 'Soap',
+        capsule: 'Capsule',
+        oil: 'Oil',
+        gel: 'Gel'
     };
     return categories[category] || category;
 }

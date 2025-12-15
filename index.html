@@ -1,17 +1,21 @@
+<!-- ========================================
+     UPDATED index.html - COMPLETE FILE
+     ======================================== -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anvik Biotecch - Your Health, One Click Away</title>
-    <link rel="stylesheet" href="styles/main.css?v=5">
+    <link rel="stylesheet" href="styles/main.css?v=4">
     <style>
-        /* WhatsApp Widget Styles - Fixed for all pages */
+        /* WhatsApp Widget Styles */
         .whatsapp-widget {
             position: fixed;
             left: 20px;
             bottom: 20px;
-            z-index: 9999;
+            z-index: 1000;
         }
 
         .whatsapp-button {
@@ -27,7 +31,6 @@
             transition: all 0.3s ease;
             position: relative;
             animation: pulse 2s infinite;
-            border: none;
         }
 
         .whatsapp-button:hover {
@@ -91,7 +94,7 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             transition: left 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             overflow: hidden;
-            z-index: 9998;
+            z-index: 999;
         }
 
         .whatsapp-chat-bar.active {
@@ -126,13 +129,12 @@
 
         .chat-info h3 {
             font-size: 1.1rem;
-            margin: 0 0 3px 0;
+            margin-bottom: 3px;
         }
 
         .chat-info p {
             font-size: 0.85rem;
             opacity: 0.9;
-            margin: 0;
         }
 
         .close-button {
@@ -149,7 +151,6 @@
             border-radius: 50%;
             transition: background 0.3s;
             line-height: 1;
-            padding: 0;
         }
 
         .close-button:hover {
@@ -171,7 +172,7 @@
 
         .message-bubble h4 {
             color: #128C7E;
-            margin: 0 0 0.5rem 0;
+            margin-bottom: 0.5rem;
             font-size: 1rem;
         }
 
@@ -179,7 +180,6 @@
             color: #666;
             font-size: 0.9rem;
             line-height: 1.5;
-            margin: 0;
         }
 
         .chat-footer {
@@ -213,86 +213,20 @@
             fill: white;
         }
 
+        /* Hide widget class */
+        .whatsapp-widget.hidden {
+            display: none;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
-            .whatsapp-widget {
-                left: 15px;
-                bottom: 15px;
-            }
-
-            .whatsapp-button {
-                width: 55px;
-                height: 55px;
-            }
-
-            .whatsapp-button svg {
-                width: 30px;
-                height: 30px;
-            }
-
             .whatsapp-chat-bar {
-                width: calc(100vw - 30px);
+                width: calc(100vw - 40px);
                 left: -100%;
-                bottom: 85px;
             }
 
             .whatsapp-chat-bar.active {
-                left: 15px;
-            }
-
-            .chat-header {
-                padding: 1rem;
-            }
-
-            .chat-avatar {
-                width: 40px;
-                height: 40px;
-                font-size: 1.3rem;
-            }
-
-            .chat-info h3 {
-                font-size: 1rem;
-            }
-
-            .chat-info p {
-                font-size: 0.8rem;
-            }
-
-            .chat-body {
-                padding: 1rem;
-            }
-
-            .message-bubble {
-                padding: 0.8rem;
-            }
-
-            .message-bubble h4 {
-                font-size: 0.95rem;
-            }
-
-            .message-bubble p {
-                font-size: 0.85rem;
-            }
-
-            .chat-footer {
-                padding: 0.8rem;
-            }
-
-            .whatsapp-link {
-                padding: 0.8rem;
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .whatsapp-button {
-                width: 50px;
-                height: 50px;
-            }
-
-            .whatsapp-button svg {
-                width: 28px;
-                height: 28px;
+                left: 20px;
             }
         }
     </style>
@@ -331,14 +265,14 @@
 
     <!-- WhatsApp Widget -->
     <div class="whatsapp-widget" id="whatsappWidget">
-        <button class="whatsapp-button" id="whatsappBtn" aria-label="Open WhatsApp Chat">
+        <div class="whatsapp-button" id="whatsappBtn">
             <div class="wave"></div>
             <div class="wave"></div>
             <div class="wave"></div>
-            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 32 32">
                 <path d="M16 0c-8.837 0-16 7.163-16 16 0 2.825 0.737 5.607 2.137 8.048l-2.137 7.952 8.188-2.113c2.343 1.225 4.978 1.863 7.625 1.863 8.837 0 16-7.163 16-16s-7.163-16-15.813-16zM16 29.25c-2.438 0-4.813-0.675-6.912-1.95l-0.488-0.3-5.175 1.338 1.4-5.075-0.325-0.513c-1.413-2.25-2.163-4.838-2.163-7.5 0-7.8 6.35-14.15 14.15-14.15s14.15 6.35 14.15 14.15-6.35 14.15-14.15 14.15zM23.363 19.288c-0.388-0.2-2.313-1.138-2.675-1.275-0.363-0.125-0.625-0.2-0.888 0.2s-1.025 1.275-1.25 1.538c-0.238 0.263-0.463 0.3-0.85 0.1s-1.663-0.613-3.163-1.95c-1.175-1.038-1.963-2.325-2.188-2.713-0.238-0.388-0.025-0.6 0.175-0.788 0.175-0.175 0.388-0.463 0.588-0.688 0.188-0.238 0.25-0.4 0.375-0.663 0.125-0.263 0.063-0.488-0.025-0.688s-0.888-2.138-1.213-2.925c-0.325-0.775-0.65-0.663-0.888-0.675-0.225-0.013-0.488-0.013-0.75-0.013s-0.688 0.1-1.05 0.488c-0.363 0.388-1.375 1.338-1.375 3.263s1.4 3.788 1.6 4.050c0.2 0.263 2.8 4.275 6.788 5.988 0.95 0.413 1.688 0.65 2.263 0.838 0.95 0.3 1.813 0.263 2.5 0.163 0.763-0.113 2.313-0.95 2.638-1.863s0.325-1.7 0.225-1.863c-0.1-0.175-0.363-0.275-0.75-0.475z"/>
             </svg>
-        </button>
+        </div>
     </div>
 
     <!-- WhatsApp Chat Bar -->
@@ -351,7 +285,7 @@
                     <p>Typically replies instantly</p>
                 </div>
             </div>
-            <button class="close-button" id="closeBtn" aria-label="Close Chat">×</button>
+            <button class="close-button" id="closeBtn">×</button>
         </div>
         <div class="chat-body">
             <div class="message-bubble">
@@ -364,8 +298,8 @@
             </div>
         </div>
         <div class="chat-footer">
-            <a href="https://wa.me/919651517148?text=Hi%20Anvik%20Biotecch!%20I%20need%20help%20with..." class="whatsapp-link" target="_blank" rel="noopener noreferrer">
-                <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <a href="https://wa.me/9196515 17148?text=Hi%20Anvik%20Biotecch!%20I%20need%20help%20with..." class="whatsapp-link" target="_blank">
+                <svg viewBox="0 0 32 32">
                     <path d="M16 0c-8.837 0-16 7.163-16 16 0 2.825 0.737 5.607 2.137 8.048l-2.137 7.952 8.188-2.113c2.343 1.225 4.978 1.863 7.625 1.863 8.837 0 16-7.163 16-16s-7.163-16-15.813-16zM16 29.25c-2.438 0-4.813-0.675-6.912-1.95l-0.488-0.3-5.175 1.338 1.4-5.075-0.325-0.513c-1.413-2.25-2.163-4.838-2.163-7.5 0-7.8 6.35-14.15 14.15-14.15s14.15 6.35 14.15 14.15-6.35 14.15-14.15 14.15zM23.363 19.288c-0.388-0.2-2.313-1.138-2.675-1.275-0.363-0.125-0.625-0.2-0.888 0.2s-1.025 1.275-1.25 1.538c-0.238 0.263-0.463 0.3-0.85 0.1s-1.663-0.613-3.163-1.95c-1.175-1.038-1.963-2.325-2.188-2.713-0.238-0.388-0.025-0.6 0.175-0.788 0.175-0.175 0.388-0.463 0.588-0.688 0.188-0.238 0.25-0.4 0.375-0.663 0.125-0.263 0.063-0.488-0.025-0.688s-0.888-2.138-1.213-2.925c-0.325-0.775-0.65-0.663-0.888-0.675-0.225-0.013-0.488-0.013-0.75-0.013s-0.688 0.1-1.05 0.488c-0.363 0.388-1.375 1.338-1.375 3.263s1.4 3.788 1.6 4.05c0.2 0.263 2.8 4.275 6.788 5.988 0.95 0.413 1.688 0.65 2.263 0.838 0.95 0.3 1.813 0.263 2.5 0.163 0.763-0.113 2.313-0.95 2.638-1.863s0.325-1.7 0.225-1.863c-0.1-0.175-0.363-0.275-0.75-0.475z"/>
                 </svg>
                 Start WhatsApp Chat
@@ -373,51 +307,32 @@
         </div>
     </div>
 
-    <script src="scripts/mobile-menu.js?v=5"></script>
+    <script src="scripts/mobile-menu.js?v=4"></script>
     <script>
-        // WhatsApp Widget JavaScript - Enhanced and Fixed
+        // WhatsApp Widget JavaScript
         (function() {
-            'use strict';
-            
+            const whatsappWidget = document.getElementById('whatsappWidget');
             const whatsappBtn = document.getElementById('whatsappBtn');
             const whatsappChatBar = document.getElementById('whatsappChatBar');
             const closeBtn = document.getElementById('closeBtn');
 
-            // Safety check
             if (!whatsappBtn || !whatsappChatBar || !closeBtn) {
-                console.warn('WhatsApp widget elements not found');
                 return;
             }
 
             // Toggle chat bar
-            whatsappBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                whatsappChatBar.classList.toggle('active');
+            whatsappBtn.addEventListener('click', function() {
+                whatsappChatBar.classList.add('active');
             });
 
-            // Close chat bar
-            closeBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
+            // Close chat bar only (not the widget)
+            closeBtn.addEventListener('click', function() {
                 whatsappChatBar.classList.remove('active');
             });
 
-            // Close when clicking outside
+            // Close chat bar when clicking outside
             document.addEventListener('click', function(e) {
-                if (!whatsappChatBar.contains(e.target) && 
-                    !whatsappBtn.contains(e.target) && 
-                    whatsappChatBar.classList.contains('active')) {
-                    whatsappChatBar.classList.remove('active');
-                }
-            });
-
-            // Prevent chat bar clicks from closing it
-            whatsappChatBar.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-
-            // ESC key to close
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && whatsappChatBar.classList.contains('active')) {
+                if (!whatsappChatBar.contains(e.target) && !whatsappBtn.contains(e.target)) {
                     whatsappChatBar.classList.remove('active');
                 }
             });

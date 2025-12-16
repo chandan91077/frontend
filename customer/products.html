@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products - Anvik Biotecch</title>
+
     <link rel="stylesheet" href="../styles/main.css?v=4">
     <link rel="stylesheet" href="../styles/customer.css?v=4">
+
+    <!-- ✅ WhatsApp Widget CSS (ADDED) -->
+    <link rel="stylesheet" href="../styles/whatsapp-widget.css?v=1">
 </head>
 <body>
     <nav class="navbar">
@@ -66,5 +70,24 @@
     <script src="../scripts/auth.js?v=4"></script>
     <script src="../scripts/customer.js?v=4"></script>
     <script src="../scripts/cart.js?v=4"></script>
+
+    <!-- ✅ WhatsApp Widget Container (ADDED) -->
+    <div id="whatsapp-widget-container"></div>
+
+    <!-- ✅ WhatsApp Widget Loader (ADDED) -->
+    <script>
+        fetch('../whatsapp-widget.html')
+          .then(res => res.text())
+          .then(html => {
+            document.getElementById('whatsapp-widget-container').innerHTML = html;
+
+            const script = document.createElement('script');
+            script.src = '../scripts/whatsapp-widget.js?v=1';
+            script.defer = true;
+            document.body.appendChild(script);
+          })
+          .catch(err => console.error('WhatsApp widget load error:', err));
+    </script>
+
 </body>
 </html>

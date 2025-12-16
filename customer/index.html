@@ -59,5 +59,22 @@
     <script src="../scripts/auth.js?v=4"></script>
     <script src="../scripts/customer.js?v=4"></script>
     <script src="../scripts/cart.js?v=4"></script>
+<link rel="stylesheet" href="../styles/whatsapp-widget.css?v=1">
+
+<div id="whatsapp-widget-container"></div>
+
+<script>
+fetch('../whatsapp-widget.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('whatsapp-widget-container').innerHTML = html;
+
+    const script = document.createElement('script');
+    script.src = '../scripts/whatsapp-widget.js?v=1';
+    script.defer = true;
+    document.body.appendChild(script);
+  });
+</script>
+
 </body>
 </html>

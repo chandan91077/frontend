@@ -171,6 +171,25 @@
         }
     });
 </script>
+ <!-- Include WhatsApp widget -->
+    <div id="whatsapp-widget-container"></div>
 
+    <script src="scripts/mobile-menu.js?v=4"></script>
+    <!-- Load WhatsApp widget -->
+    <script>
+        // Load WhatsApp widget HTML
+        fetch('whatsapp-widget.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('whatsapp-widget-container').innerHTML = html;
+                // Now load the JavaScript
+                const script = document.createElement('script');
+                script.src = 'scripts/whatsapp-widget.js?v=1';
+                document.body.appendChild(script);
+            })
+            .catch(err => {
+                console.error('Failed to load WhatsApp widget:', err);
+            });
+    </script>
 </body>
 </html>
